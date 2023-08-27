@@ -5,7 +5,7 @@
     "koa2"
   ],
   "scripts": {
-    "start": "node app.js && npm run migrate",
+    "start": "node app.js",
     "start_txc": "APP_ENV=txc node app.js",
     "start_lily": "APP_ENV=lily node app.js",
     "start_local": "APP_ENV=local node app.js",

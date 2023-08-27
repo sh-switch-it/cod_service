@@ -18,7 +18,7 @@ const authService = require('./src/service/authService');
 const { TokenUtil } = require('./src/utils/jwtTokenUtil');
 const cors = require('koa2-cors');
 const teamService = require('./src/service/teamService');
-
+const config = require('./src/configReader')().config;
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, path.join(__dirname ,'/upload_temp'))
@@ -52,7 +52,7 @@ app.use(cors({
   //   }
   //   return 'http://127.0.0.1:3000';
   // },
-	origin: "http://127.0.0.1:3000",
+	origin: config.web.url,
   // exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
   // maxAge: 5,
   credentials: true,
@@ -69,7 +69,7 @@ app.use(authRouter.routes())
 //     ctx.body = 'Hello World!';
 // });
     
-const staticPath = './static'
+const staticPath = './build'
 
 console.log(__dirname + '' + staticPath);
 
