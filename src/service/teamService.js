@@ -1,4 +1,4 @@
-const teamDAO = require('../db/dao/teamDAO');
+const teamDAO = require('../db/dao/TeamDAO');
 
 module.exports = {
     async addCustomer(team_id, customer_id) {
