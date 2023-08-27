@@ -221,13 +221,10 @@ app.use(async(ctx, next) => {
 app.listen(3010, async () => {
     console.log('mode', mode);
     let success = await dbPreCheck();
-    //await redis.setItem('test', 'jake.zheng3');
     if (success) {
         console.log('database initialize success');
     }
     console.log('app started at port 3010...');
-    //let test = await redis.getItem('test');
-    console.log(test);
 });
 
 // if(process.env.APP_ENV !== 'aws' && process.env.APP_ENV !== 'prod'){
