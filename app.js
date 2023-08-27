@@ -9,7 +9,7 @@ const helmet = require("koa-helmet");
 const static = require('koa-static');
 const path = require('path');
 const bodyParser = require('koa-bodyparser');
-const redis = require('./src/redis/connect');
+//const redis = require('./src/redis/connect');
 const customerService = require('./src/service/customerService');
 const { async } = require('q');
 const multer = require('@koa/multer');
@@ -110,7 +110,7 @@ authRouter.post('/auth', async (ctx, next) => {
 	if(authUser){
 		ctx.body = 'hello ' + authUser.username;
 		const jwtToken = TokenUtil.sign(authUser.username);
-		await redis.setItem('jwt_' + authUser.username, jwtToken);
+		//await redis.setItem('jwt_' + authUser.username, jwtToken);
 		ctx.body = jwtToken;
 	}else{
 		ctx.response.status = 400;
@@ -221,12 +221,12 @@ app.use(async(ctx, next) => {
 app.listen(3010, async () => {
     console.log('mode', mode);
     let success = await dbPreCheck();
-    await redis.setItem('test', 'jake.zheng3');
+    //await redis.setItem('test', 'jake.zheng3');
     if (success) {
         console.log('database initialize success');
     }
     console.log('app started at port 3010...');
-    let test = await redis.getItem('test');
+    //let test = await redis.getItem('test');
     console.log(test);
 });
 
