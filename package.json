@@ -6,6 +6,7 @@
   ],
   "scripts": {
     "start": "node app.js && npm run migrate",
+    "start_txc": "APP_ENV=txc node app.js",
     "start_lily": "APP_ENV=lily node app.js",
     "start_local": "APP_ENV=local node app.js",
     "start_aws": "APP_ENV=aws node app.js",
