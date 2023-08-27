@@ -8,27 +8,10 @@ User.init({
         type: DataTypes.STRING,
         allowNull: false
     },
-    email: {
+    password: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    avatar: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    location: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    signature: {
-        type: DataTypes.JSON,
-        allowNull: true
-    },
-    inviter: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    //0 delete, 1 normal, 2 pending, 3 reject
     status: {
         type: DataTypes.INTEGER,
         allowNull: false
@@ -38,21 +21,43 @@ User.init({
     freezeTableName: true,
     tableName: 'users',
 });
-
-class Company extends Model {}
-Company.init({
-    // attributes
-    company_name: {
+class Customer extends Model {}
+Customer.init({
+    name: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    logo: {
+    phone: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    // location: {
+    //     type: DataTypes.STRING,
+    //     allowNull: true
+    // },
+    org: {
         type: DataTypes.STRING,
         allowNull: true
     },
-    domain: {
+    job: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    status: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+}, {
+    sequelize,
+    freezeTableName: true,
+    tableName: 'customers',
+});
+class Team extends Model {}
+Team.init({
+    // attributes
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
     location: {
         type: DataTypes.STRING,
@@ -69,115 +74,142 @@ Company.init({
 }, {
     sequelize,
     freezeTableName: true,
-    tableName: 'companies',
+    tableName: 'teams',
 });
-Company.hasMany(User, { foreignKey: 'company_id', targetKey: 'id', as: 'user'})
 
-class Meeting extends Model {}
-Meeting.init({
-    organizer:{
-        type:DataTypes.STRING,
-        allowNull: true,
-    },
-    title:{
-        type:DataTypes.STRING,
-        allowNull: false
-    },
-    startTime:{
-        type: DataTypes.DATE,
-        allowNull: false
-    },
-    duration:{
+
+class TeamCustomer extends Model{}
+TeamCustomer.init({
+    // id:{
+    //     type: DataTypes.INTEGER,
+    //     allowNull: false,
+    //     autoIncrement: true,
+    //     primaryKey: true
+    // },
+    teamId:{
         type: DataTypes.INTEGER,
-        allowNull: false
-    },
-    durationExtended:{
-        type: DataTypes.INTEGER, // 0  not extended，1 extended
+        field: 'team_id',
         allowNull: false,
         defaultValue: 0
     },
-    agenda:{
-        type: DataTypes.STRING,
-        allowNull: true
+    customerId:{
+        type: DataTypes.INTEGER,
+        field: 'customer_id',
+        allowNull: false,
+        defaultValue: 0
     },
-    host:{
-        type:DataTypes.STRING,
-        allowNull: true
-    },
-    conferenceId:{
-        type:DataTypes.STRING,
-        allowNull: false
-    },
-    status: {
-        type: DataTypes.INTEGER, // 1  not start，2 in progress， 3 cancelled，4 finished
-        allowNull: false
-    },
-    participants:{
-        type: DataTypes.STRING(2048),
-        allowNull: true
-    },
-    requests:{
-        type: DataTypes.JSON,
-        allowNull: true
-    },
-    organizationId:{
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-
-    // [
-    //     {requestId:xxxx,fileId:xxxxxx,status:xxxxx}
-    // ]
-    signatureRequests:{
-        type: DataTypes.JSON,
-        allowNull: true
-    },
-    servicePackage:{
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-},
-{
+},{
     sequelize,
     freezeTableName: true,
-    tableName: 'meetings',
+    tableName: 'TeamCustomer',
 });
 
+Team.belongsToMany(Customer, { through: TeamCustomer,as: 'customers'});
+Customer.belongsToMany(Team, { through: TeamCustomer,as: 'teams'});
+// class Meeting extends Model {}
+// Meeting.init({
+//     organizer:{
+//         type:DataTypes.STRING,
+//         allowNull: true,
+//     },
+//     title:{
+//         type:DataTypes.STRING,
+//         allowNull: false
+//     },
+//     startTime:{
+//         type: DataTypes.DATE,
+//         allowNull: false
+//     },
+//     duration:{
+//         type: DataTypes.INTEGER,
+//         allowNull: false
+//     },
+//     durationExtended:{
+//         type: DataTypes.INTEGER, // 0  not extended，1 extended
+//         allowNull: false,
+//         defaultValue: 0
+//     },
+//     agenda:{
+//         type: DataTypes.STRING,
+//         allowNull: true
+//     },
+//     host:{
+//         type:DataTypes.STRING,
+//         allowNull: true
+//     },
+//     conferenceId:{
+//         type:DataTypes.STRING,
+//         allowNull: false
+//     },
+//     status: {
+//         type: DataTypes.INTEGER, // 1  not start，2 in progress， 3 cancelled，4 finished
+//         allowNull: false
+//     },
+//     participants:{
+//         type: DataTypes.STRING(2048),
+//         allowNull: true
+//     },
+//     requests:{
+//         type: DataTypes.JSON,
+//         allowNull: true
+//     },
+//     organizationId:{
+//         type: DataTypes.STRING,
+//         allowNull: true
+//     },
 
-class Invitation extends Model {}
-Invitation.init({
-    inviter:{
-        type:DataTypes.STRING,
-        allowNull: true,
-    },
-    invitee:{
-        type:DataTypes.STRING,
-        allowNull: false
-    },
-    invitationCode:{
-        type:DataTypes.STRING,
-        allowNull: false
-    },
-    expireTime:{ //unit second
-        type:DataTypes.INTEGER,
-        allowNull: false
-    },
-    status: {
-        type: DataTypes.INTEGER, // 0: pendding, 1: finished
-        allowNull: false
-    },
-},
-{
-    sequelize,
-    freezeTableName: true,
-    tableName: 'invitations',
-});
+//     // [
+//     //     {requestId:xxxx,fileId:xxxxxx,status:xxxxx}
+//     // ]
+//     signatureRequests:{
+//         type: DataTypes.JSON,
+//         allowNull: true
+//     },
+//     servicePackage:{
+//         type: DataTypes.STRING,
+//         allowNull: true
+//     },
+// },
+// {
+//     sequelize,
+//     freezeTableName: true,
+//     tableName: 'meetings',
+// });
+
+
+// class Invitation extends Model {}
+// Invitation.init({
+//     inviter:{
+//         type:DataTypes.STRING,
+//         allowNull: true,
+//     },
+//     invitee:{
+//         type:DataTypes.STRING,
+//         allowNull: false
+//     },
+//     invitationCode:{
+//         type:DataTypes.STRING,
+//         allowNull: false
+//     },
+//     expireTime:{ //unit second
+//         type:DataTypes.INTEGER,
+//         allowNull: false
+//     },
+//     status: {
+//         type: DataTypes.INTEGER, // 0: pendding, 1: finished
+//         allowNull: false
+//     },
+// },
+// {
+//     sequelize,
+//     freezeTableName: true,
+//     tableName: 'invitations',
+// });
 
 
 
 module.exports = {
     'User':User,
-    'Company': Company,
-    'Meeting': Meeting,
-    'Invitation': Invitation
+    'Customer':Customer,
+    'Team': Team
 }
