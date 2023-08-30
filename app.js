@@ -237,10 +237,16 @@ authRouter.post('/api/teams/:id/customers', async(ctx, next) => {
 //   })
 //   fs.createReadStream(filePath).pipe(res)
 // })
+authRouter.get("/", async(ctx, next) => {
+	ctx.type = 'html';
+  ctx.body = fs.createReadStream('./build/index.html');
+});
 
 app.use(static(
 	path.join( __dirname,  staticPath)
 ));
+
+
 
 
 app.listen(3010, async () => {
