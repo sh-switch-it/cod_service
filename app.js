@@ -98,10 +98,6 @@ async function middlewareCheckAuthingToken(ctx, next) {
         ctx.response.status = 403;
     }
   }
-app.use(static(
-    path.join( __dirname,  staticPath)
-));
-
 
 authRouter.post('/auth', async (ctx, next) => {
 	const username = ctx.request.body.username;
@@ -242,9 +238,10 @@ authRouter.post('/api/teams/:id/customers', async(ctx, next) => {
 //   fs.createReadStream(filePath).pipe(res)
 // })
 
-app.use(async(ctx, next) => {
-    ctx.response.body = "cod service is online";
-})
+app.use(static(
+	path.join( __dirname,  staticPath)
+));
+
 
 app.listen(3010, async () => {
     console.log('mode', mode);
