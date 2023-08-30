@@ -18,6 +18,7 @@ const authService = require('./src/service/authService');
 const { TokenUtil } = require('./src/utils/jwtTokenUtil');
 const cors = require('koa2-cors');
 const teamService = require('./src/service/teamService');
+const codService = require('./src/service/codService');
 const config = require('./src/configReader')().config;
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -204,6 +205,33 @@ authRouter.post('/api/teams/:id/customers', async(ctx, next) => {
 			const result = await teamService.addTeam(body.name,body.location,body.description);
 			ctx.body = result;
 	})
+
+	authRouter.post('/api/cod', async(ctx, next) => {
+		let body = ctx.request.body;
+		const result = await codService.addCodTask(body.pendingTime,body.retryTimes,body.textTemplate);
+		ctx.body = result;
+	});
+
+	authRouter.post('/api/cod/:id/call', async(ctx, next) => {
+		const codId = ctx.params.id;
+		const body = ctx.request.body;
+		const result = await codService.addCallRecordsToCodeTask(codId,body);
+		ctx.body = result;
+	});
+
+	authRouter.get('/api/cod', async(ctx, next) => {
+		const result = await codService.getCodTasks();
+		ctx.body = result;
+	});
+
+
+	authRouter.get('/public/audio/:id', async(ctx, next) => {
+		const audioId = ctx.params.id;
+
+		const rstream = fs.createReadStream(__dirname + '/audio/demo.wav');
+		ctx.response.set("content-type", "audio/wav");
+		ctx.body = rstream;
+		});
 // authRouter.get('/api/download', (req, res) => {
 //   const filePath = __dirname + '/question.pptx';
 //   const fileName = 'question.pptx'

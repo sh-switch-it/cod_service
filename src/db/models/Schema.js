@@ -106,6 +106,73 @@ TeamCustomer.init({
 
 Team.belongsToMany(Customer, { through: TeamCustomer,as: 'customers'});
 Customer.belongsToMany(Team, { through: TeamCustomer,as: 'teams'});
+
+class CodRecord extends Model {}
+CodRecord.init({
+    // attributes
+    pendingTime:{
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    retryTimes:{
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    textTemplate:{
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    status: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    }
+}, {
+    sequelize,
+    freezeTableName: true,
+    tableName: 'cod_record',
+});
+
+class CallRecord extends Model {}
+CallRecord.init({
+    // attributes
+    callee:{
+        type: DataTypes.JSON,
+        allowNull: false
+    },
+    callTime:{
+        type: DataTypes.TIME,
+        allowNull: false
+    },
+    retryTimes:{
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    answerTime:{
+        type: DataTypes.TIME,
+        allowNull: true
+    },
+    hangUpTime:{
+        type: DataTypes.TIME,
+        allowNull: true
+    },
+    callStatus:{
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    status: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    }
+}, {
+    sequelize,
+    freezeTableName: true,
+    tableName: 'call_record',
+});
+
+
+CodRecord.hasMany(CallRecord, {as: 'callRecords', foreignKey: 'CodRecordId'});
+CallRecord.belongsTo(CodRecord);
+
 // class Meeting extends Model {}
 // Meeting.init({
 //     organizer:{
@@ -211,5 +278,7 @@ Customer.belongsToMany(Team, { through: TeamCustomer,as: 'teams'});
 module.exports = {
     'User':User,
     'Customer':Customer,
-    'Team': Team
+    'Team': Team,
+    'CodRecord': CodRecord,
+    'CallRecord': CallRecord
 }
