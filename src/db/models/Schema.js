@@ -12,6 +12,10 @@ User.init({
         type: DataTypes.STRING,
         allowNull: false
     },
+    role: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
     status: {
         type: DataTypes.INTEGER,
         allowNull: false

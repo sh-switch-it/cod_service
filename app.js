@@ -14,11 +14,11 @@ const customerService = require('./src/service/customerService');
 const { async } = require('q');
 const multer = require('@koa/multer');
 const readXlsxFile = require('read-excel-file/node');
-const authService = require('./src/service/authService');
 const { TokenUtil } = require('./src/utils/jwtTokenUtil');
 const cors = require('koa2-cors');
 const teamService = require('./src/service/teamService');
 const codService = require('./src/service/codService');
+const userService = require('./src/service/userService');
 const config = require('./src/configReader')().config;
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -103,7 +103,7 @@ authRouter.post('/auth', async (ctx, next) => {
 	const username = ctx.request.body.username;
 	const password = ctx.request.body.password;
 
-	const authUser = await authService.isAuth(username,password);
+	const authUser = await userService.isAuth(username,password);
 	if(authUser){
 		ctx.body = 'hello ' + authUser.username;
 		const jwtToken = TokenUtil.sign(authUser.username);
@@ -115,6 +115,17 @@ authRouter.post('/auth', async (ctx, next) => {
 })
 
 authRouter.use('/api/*', middlewareCheckAuthingToken);
+
+authRouter.get('/api/accounts', async(ctx, next)=>{
+	const result = await userService.getUsers();
+	ctx.body = result;
+})
+
+authRouter.post('/api/accounts', async(ctx, next)=>{
+	const user = ctx.request.body;
+	const result = await userService.addUser(user.username,user.password, user.role);
+	ctx.body = result;
+})
 
 
 
