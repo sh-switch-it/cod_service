@@ -57,7 +57,7 @@ app.use(cors({
   // exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
   // maxAge: 5,
   credentials: true,
-  allowMethods: ['GET', 'POST', 'DELETE','PUT','OPTION'],
+  allowMethods: ['GET', 'POST','PATCH','DELETE','PUT','OPTION'],
   //allowHeaders: ['Content-Type', 'Authorization', 'Accept','Authing-Jwt-Token','authing-jwt-token','pragma','cache-control'],
 }));
 app.use(bodyParser());
@@ -123,10 +123,31 @@ authRouter.get('/api/accounts', async(ctx, next)=>{
 
 authRouter.post('/api/accounts', async(ctx, next)=>{
 	const user = ctx.request.body;
-	const result = await userService.addUser(user.username,user.password, user.role);
+	let result;
+	try{
+		result = await userService.addUser(user.username,user.password, user.role);
+		ctx.body = result;
+	}catch(e){
+		if(e.message === "user existed"){
+			ctx.response.status = 409;
+		}else{
+			ctx.response.status = 400;
+		}
+	}
+})
+
+authRouter.patch('/api/accounts/:id', async(ctx, next)=>{
+	const id = ctx.params.id;
+	const updatePart = ctx.request.body;
+	let result = await userService.updateUser(id,updatePart);
 	ctx.body = result;
 })
 
+authRouter.delete('/api/accounts/:id', async(ctx, next)=>{
+	const id = ctx.params.id;
+	let result = await userService.removeUser(id);
+	ctx.body = result;
+})
 
 
 authRouter.get('/api/health', async(ctx, next) => {
