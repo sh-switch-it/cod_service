@@ -1,4 +1,6 @@
+const { ServerOptions } = require('https');
 const https = require('https');
+const pem = require('pem');
 const Koa = require('koa');
 const sslify = require('koa-sslify').default;
 const fs = require('fs');
@@ -20,6 +22,8 @@ const teamService = require('./src/service/teamService');
 const codService = require('./src/service/codService');
 const userService = require('./src/service/userService');
 const config = require('./src/configReader')().config;
+const writeXlsxFile = require('write-excel-file/node');
+const {Readable} = require('stream');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, path.join(__dirname ,'/upload_temp'))
@@ -35,6 +39,11 @@ const limits = {
     fileSize: 500 * 1024,//文件大小 单位 b
     files: 1//文件数量
 }
+
+const certProps = {
+	days: 365, // Validity in days
+	selfSigned: true,
+  };
 
 
 const upload = multer({storage,limits})
@@ -177,7 +186,7 @@ authRouter.delete('/api/customers/:id', async(ctx, next) => {
     ctx.body = result;
 })
 authRouter.post(
-    '/api/upload_customers',
+    '/api/file_customers',
     upload.single('file'),
     async (ctx,next) => {
 			const filePath = path.join(__dirname ,'/upload_temp');
@@ -186,29 +195,82 @@ authRouter.post(
 			for (let i = 1; i < rows.length; i++) {
 				const item = rows[i];
 				const phone = item[1].toString();
-				const isExist = await customerService.isCustomerExist(phone);
-				if(isExist){
-					const existCustomer = await customerService.getCustomerByPhone(phone);
+				const existed = await customerService.isCustomerExist(phone);
+				if(existed){
 					const updateCustomer = {
-						id: existCustomer.id,
+						id: existed.id,
 						name: item[0],
 						phone: phone,
 						org: item[2],
-						job: item[3]
+						job: item[3],
+						status: 1
 					}
 					await customerService.updateCustomer(updateCustomer);
 				} else {
-
 					await customerService.addCustomer(item[0],phone,item[2],item[3]);
 				}
 			}
-			ctx.body = 'upload successfully';
+			ctx.body = 'ok';
     }
   );
 
-	authRouter.get('/api/teams', async(ctx, next) => {
-		const result = await teamService.getTeams();
-		ctx.body = result;
+  authRouter.get(
+    '/api/file_customers',
+    async (ctx,next) => {
+		const data = [];
+		const HEADER_ROW = [
+			{
+			  value: '姓名',
+			  fontWeight: 'bold'
+			},
+			{
+			  value: '手机',
+			  fontWeight: 'bold'
+			},
+			{
+			  value: '部门',
+			  fontWeight: 'bold'
+			},
+			{
+			  value: '职务',
+			  fontWeight: 'bold'
+			}
+		  ];
+		data.push(HEADER_ROW);
+		const customers = await customerService.getCustomers();
+		customers.map((item) => {
+			const nameField = {
+				type: String,
+				value: item.name
+			};
+			const phoneField = {
+				type: String,
+				value: item.phone
+			};
+			const orgField = {
+				type: String,
+				value: item.org
+			};
+			const jobField = {
+				type: String,
+				value: item.job
+			};
+			const row = [nameField,phoneField,orgField,jobField];
+			data.push(row);
+		});
+		await writeXlsxFile(data, {
+			filePath: __dirname + '/download_temp/download.xlsx'
+		});
+		ctx.set('Content-disposition', 'attachment; filename=' + "download.xlsx");
+		ctx.set('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		ctx.body = fs.createReadStream(__dirname + '/download_temp/download.xlsx');
+		
+    }
+  );
+
+authRouter.get('/api/teams', async(ctx, next) => {
+	const result = await teamService.getTeams();
+	ctx.body = result;
 		
 })
 
@@ -279,8 +341,24 @@ app.use(static(
 ));
 
 
+if(mode !== "local"){
+	pem.createCertificate(certProps, (error, keys) => {
+	if (error) {
+	  throw error;
+	}
+	const credentials = { key: keys.serviceKey, cert: keys.certificate };
+	const httpsServer = https.createServer(credentials, app.callback());
+	httpsServer.listen(3010, async () => {
+		console.log('mode', mode);
+		let success = await dbPreCheck();
+		if (success) {
+			console.log('database initialize success');
+		}
+		console.log('app started at port 3010...');
+	});
+  });
 
-
+}else{
 app.listen(3010, async () => {
     console.log('mode', mode);
     let success = await dbPreCheck();
@@ -289,6 +367,7 @@ app.listen(3010, async () => {
     }
     console.log('app started at port 3010...');
 });
+}
 
 // if(process.env.APP_ENV !== 'aws' && process.env.APP_ENV !== 'prod'){
 //     app.listen(3010,async ()=>{

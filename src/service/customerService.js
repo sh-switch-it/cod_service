@@ -49,7 +49,7 @@ module.exports = {
     async removeCustomer(id) {
         let customer;
         try{
-          customer = await customerDAO.remove(id);
+          customer = await customerDAO.update(id,{status:0});
         }catch(e){
             throw e;
         }
