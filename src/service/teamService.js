@@ -66,7 +66,7 @@ module.exports = {
     async removeTeam(id) {
       let team;
       try {
-        team = await teamDAO.remove(id);
+        team = await teamDAO.update(id,{status:0})
       } catch (e) {
         throw e;
       }
@@ -82,16 +82,14 @@ module.exports = {
       return teams;
     },
 
-    async updateTeam(newTeam)
+    async updateTeam(id,newTeam)
     {
       try {
-        let teamExist = await teamDAO.query({ 'id': newTeam.id });
+        let teamExist = await teamDAO.query({ 'id': id });
         if (!teamExist) {
           throw new Error('team not existed');
         }
-
-        const updatedTeam = await teamDAO.update(newTeam.id, newTeam)
-
+        const updatedTeam = await teamDAO.update(id, newTeam)
         return updatedTeam;
       } catch (e) {
         console.error(e);

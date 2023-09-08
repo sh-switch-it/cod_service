@@ -11,34 +11,22 @@ const helmet = require("koa-helmet");
 const static = require('koa-static');
 const path = require('path');
 const bodyParser = require('koa-bodyparser');
+const userService = require('./src/service/userService');
 //const redis = require('./src/redis/connect');
-const customerService = require('./src/service/customerService');
-const { async } = require('q');
-const multer = require('@koa/multer');
-const readXlsxFile = require('read-excel-file/node');
+
 const { TokenUtil } = require('./src/utils/jwtTokenUtil');
 const cors = require('koa2-cors');
-const teamService = require('./src/service/teamService');
-const codService = require('./src/service/codService');
-const userService = require('./src/service/userService');
+
 const config = require('./src/configReader')().config;
-const writeXlsxFile = require('write-excel-file/node');
-const {Readable} = require('stream');
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, path.join(__dirname ,'/upload_temp'))
-    },
-    filename: function (req, file, cb) {
-        let type = file.originalname.split('.')[1]
-        cb(null, `${file.fieldname}.${type}`)
-    }
-})
-//文件上传限制
-const limits = {
-    fields: 10,//非文件字段的数量
-    fileSize: 500 * 1024,//文件大小 单位 b
-    files: 1//文件数量
-}
+
+const ttsService = require('./src/service/ttsService');
+
+const accountRouter = require('./src/routers/accountRouter');
+const customerRouter = require('./src/routers/customerRouter');
+const teamRouter = require('./src/routers/teamRouter');
+const codRouter = require('./src/routers/codRouter');
+
+
 
 const certProps = {
 	days: 365, // Validity in days
@@ -46,7 +34,7 @@ const certProps = {
   };
 
 
-const upload = multer({storage,limits})
+
 // const { runKafkaConsumer, kafkaInit } = require('./src/kafka/kafka_processor.js');
 
 let mode = process.env.APP_ENV ? process.env.APP_ENV : "local";
@@ -75,14 +63,10 @@ let authRouter = new Router()
 app.use(authRouter.routes())
 .use(authRouter.allowedMethods());
 
-// authRouter.get('/', (ctx, next) => {
-//     ctx.body = 'Hello World!';
-// });
     
 const staticPath = './build'
 
 console.log(__dirname + '' + staticPath);
-
 
 async function middlewareCheckAuthingToken(ctx, next) {
 		
@@ -125,203 +109,22 @@ authRouter.post('/auth', async (ctx, next) => {
 
 authRouter.use('/api/*', middlewareCheckAuthingToken);
 
-authRouter.get('/api/accounts', async(ctx, next)=>{
-	const result = await userService.getUsers();
-	ctx.body = result;
-})
 
-authRouter.post('/api/accounts', async(ctx, next)=>{
-	const user = ctx.request.body;
-	let result;
-	try{
-		result = await userService.addUser(user.username,user.password, user.role);
-		ctx.body = result;
-	}catch(e){
-		if(e.message === "user existed"){
-			ctx.response.status = 409;
-		}else{
-			ctx.response.status = 400;
-		}
-	}
-})
-
-authRouter.patch('/api/accounts/:id', async(ctx, next)=>{
-	const id = ctx.params.id;
-	const updatePart = ctx.request.body;
-	let result = await userService.updateUser(id,updatePart);
-	ctx.body = result;
-})
-
-authRouter.delete('/api/accounts/:id', async(ctx, next)=>{
-	const id = ctx.params.id;
-	let result = await userService.removeUser(id);
-	ctx.body = result;
-})
+authRouter.post('/public/tts', async(ctx, next) => {
+	const body = ctx.request.body;
+	const filename = await ttsService.generateAudio(body.id,body.text);
+	const rstream = fs.createReadStream(filename);
+	ctx.response.set("content-type", "audio/mp3");
+	ctx.body = rstream;
+});
 
 
-authRouter.get('/api/health', async(ctx, next) => {
-    ctx.body = 'Hello World';
-})
-authRouter.get('/api/customers', async(ctx, next) => {
-    const result = await customerService.getCustomers();
-    ctx.body = result;
-})
-
-authRouter.put('/api/customers', async(ctx, next) => {
-    const newCustomer = ctx.request.body;
-    const result = await customerService.updateCustomer(newCustomer);
-    ctx.body = result;
-})
-
-authRouter.post('/api/customers', async(ctx, next) => {
-    let body = ctx.request.body;
-    // console.log("body",JSON.stringify(body));
-    const result = await customerService.addCustomer(body.name,body.phone,body.org,body.job);
-    ctx.body = result;
-})
-
-authRouter.delete('/api/customers/:id', async(ctx, next) => {
-    let id = ctx.params.id;
-    const result = await customerService.removeCustomer(id);
-    ctx.body = result;
-})
-authRouter.post(
-    '/api/file_customers',
-    upload.single('file'),
-    async (ctx,next) => {
-			const filePath = path.join(__dirname ,'/upload_temp');
-			console.log('file path',filePath );
-			const rows = await readXlsxFile(fs.createReadStream(filePath + '/file.xlsx'));
-			for (let i = 1; i < rows.length; i++) {
-				const item = rows[i];
-				const phone = item[1].toString();
-				const existed = await customerService.isCustomerExist(phone);
-				if(existed){
-					const updateCustomer = {
-						id: existed.id,
-						name: item[0],
-						phone: phone,
-						org: item[2],
-						job: item[3],
-						status: 1
-					}
-					await customerService.updateCustomer(updateCustomer);
-				} else {
-					await customerService.addCustomer(item[0],phone,item[2],item[3]);
-				}
-			}
-			ctx.body = 'ok';
-    }
-  );
-
-  authRouter.get(
-    '/api/file_customers',
-    async (ctx,next) => {
-		const data = [];
-		const HEADER_ROW = [
-			{
-			  value: '姓名',
-			  fontWeight: 'bold'
-			},
-			{
-			  value: '手机',
-			  fontWeight: 'bold'
-			},
-			{
-			  value: '部门',
-			  fontWeight: 'bold'
-			},
-			{
-			  value: '职务',
-			  fontWeight: 'bold'
-			}
-		  ];
-		data.push(HEADER_ROW);
-		const customers = await customerService.getCustomers();
-		customers.map((item) => {
-			const nameField = {
-				type: String,
-				value: item.name
-			};
-			const phoneField = {
-				type: String,
-				value: item.phone
-			};
-			const orgField = {
-				type: String,
-				value: item.org
-			};
-			const jobField = {
-				type: String,
-				value: item.job
-			};
-			const row = [nameField,phoneField,orgField,jobField];
-			data.push(row);
-		});
-		await writeXlsxFile(data, {
-			filePath: __dirname + '/download_temp/download.xlsx'
-		});
-		ctx.set('Content-disposition', 'attachment; filename=' + "download.xlsx");
-		ctx.set('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		ctx.body = fs.createReadStream(__dirname + '/download_temp/download.xlsx');
-		
-    }
-  );
-
-authRouter.get('/api/teams', async(ctx, next) => {
-	const result = await teamService.getTeams();
-	ctx.body = result;
-		
-})
-
-authRouter.get('/api/teams/:id', async(ctx, next) => {
-	const teamId = ctx.params.id;
-	const result = await teamService.getTeamById(teamId);
-	ctx.body = result;
-})
-
-
-authRouter.post('/api/teams/:id/customers', async(ctx, next) => {
-	const teamId = ctx.params.id;
-	const customer_ids = ctx.request.body.customer_ids;
- const result = await teamService.addOrUpdateCustomers(teamId,customer_ids);
-	return result;
-})
-
-
-	authRouter.post('/api/teams', async(ctx, next) => {
-			let body = ctx.request.body;
-			// console.log("body",JSON.stringify(body));
-			const result = await teamService.addTeam(body.name,body.location,body.description);
-			ctx.body = result;
-	})
-
-	authRouter.post('/api/cod', async(ctx, next) => {
-		let body = ctx.request.body;
-		const result = await codService.addCodTask(body.pendingTime,body.retryTimes,body.textTemplate);
-		ctx.body = result;
-	});
-
-	authRouter.post('/api/cod/:id/call', async(ctx, next) => {
-		const codId = ctx.params.id;
-		const body = ctx.request.body;
-		const result = await codService.addCallRecordsToCodeTask(codId,body);
-		ctx.body = result;
-	});
-
-	authRouter.get('/api/cod', async(ctx, next) => {
-		const result = await codService.getCodTasks();
-		ctx.body = result;
-	});
-
-
-	authRouter.get('/public/audio/:id', async(ctx, next) => {
-		const audioId = ctx.params.id;
-
-		const rstream = fs.createReadStream(__dirname + '/audio/demo.wav');
-		ctx.response.set("content-type", "audio/wav");
-		ctx.body = rstream;
-		});
+authRouter.get('/public/audio/:id', async(ctx, next) => {
+	const audioId = ctx.params.id;
+	const rstream = fs.createReadStream(__dirname + '/audio/demo.wav');
+	ctx.response.set("content-type", "audio/wav");
+	ctx.body = rstream;
+});
 // authRouter.get('/api/download', (req, res) => {
 //   const filePath = __dirname + '/question.pptx';
 //   const fileName = 'question.pptx'
@@ -331,6 +134,13 @@ authRouter.post('/api/teams/:id/customers', async(ctx, next) => {
 //   })
 //   fs.createReadStream(filePath).pipe(res)
 // })
+const nestedRoutes = [accountRouter,customerRouter,teamRouter,codRouter];
+for (var router of nestedRoutes) {
+    authRouter.use(router.routes(), router.allowedMethods())
+}
+
+
+
 authRouter.get("/", async(ctx, next) => {
 	ctx.type = 'html';
   ctx.body = fs.createReadStream('./build/index.html');
