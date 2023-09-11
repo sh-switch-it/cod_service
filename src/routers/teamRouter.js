@@ -20,7 +20,7 @@ teamRouter.post('/teams/:id/customers', async (ctx, next) => {
     const teamId = ctx.params.id;
     const customer_ids = ctx.request.body.customer_ids;
     const result = await teamService.addOrUpdateCustomers(teamId, customer_ids);
-    return result;
+    ctx.body = result;
 })
 
 
