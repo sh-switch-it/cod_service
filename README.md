@@ -40,7 +40,16 @@ sudo mkdir ~/docker_v
 sudo mkdir ~/docker_v/postgres
 sudo docker run -d --name cod-postgres -e POSTGRES_PASSWORD=admin -e PGDATA=/var/lib/postgresql/data/pgdata -v ~/docker_v/postgres:/var/lib/postgresql/data -p 15432:5432 postgres
 ```
-
+###5.1 链接postgres 
+```
+sudo apt install postgresql-client-common
+sudo apt-get install postgresql-client
+```
+###5.1 创建database cod
+```
+ psql -h localhost -p 15432 -U postgres -d postgres
+ CREATE DATABASE cod;
+```
 ##6 clone code
 ```
 mkdir ~/workspaces
