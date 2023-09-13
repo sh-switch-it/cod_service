@@ -25,6 +25,7 @@ const accountRouter = require('./src/routers/accountRouter');
 const customerRouter = require('./src/routers/customerRouter');
 const teamRouter = require('./src/routers/teamRouter');
 const codRouter = require('./src/routers/codRouter');
+const ttsService2 = require('./src/service/ttsService2');
 
 
 
@@ -119,9 +120,23 @@ authRouter.post('/public/tts', async(ctx, next) => {
 });
 
 
+authRouter.post('/public/tts2', async(ctx, next) => {
+	const body = ctx.request.body;
+	const fileId = await ttsService2.text2SpeechWave(body.id,body.text)
+	ctx.body = fileId;
+});
+
+authRouter.get('/public/tts2/:id', async(ctx, next) => {
+	const id = ctx.params.id;
+	const rstream = fs.createReadStream(__dirname + `/audio/${id}.wav`);
+	ctx.response.set("content-type", "audio/wav");
+	ctx.body = rstream;
+});
+
+
 authRouter.get('/public/audio/:id', async(ctx, next) => {
 	const audioId = ctx.params.id;
-	const rstream = fs.createReadStream(__dirname + '/audio/demo.wav');
+	const rstream = fs.createReadStream(__dirname + `/tts_audio/${audioId}.wav`);
 	ctx.response.set("content-type", "audio/wav");
 	ctx.body = rstream;
 });
