@@ -126,6 +126,10 @@ CodRecord.init({
         type: DataTypes.TEXT,
         allowNull: true
     },
+    codStatus:{
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
     status: {
         type: DataTypes.INTEGER,
         allowNull: false
@@ -161,7 +165,7 @@ CallRecord.init({
     },
     callStatus:{
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     status: {
         type: DataTypes.INTEGER,

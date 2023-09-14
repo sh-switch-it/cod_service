@@ -17,13 +17,25 @@ client.connect('http://192.168.31.163:8088', 'asterisk', '123456').then(ari => {
         console.log('StasisEnd_event');
         console.log('channel');//接通后挂电话了
     });
-    channel.on('ChannelDtmfReceived', function (event, channel) { });
+    //channel.on('ChannelDtmfReceived', function (event, channel) { });
     channel.once('ChannelDestroyed', function (event, channel) {
         console.log('ChannelDestroyed');
         console.log('channel');//不接电话，直接挂断
+        console.log(event);
+        // timeout
+        // cause: 0,
+        // cause_txt: 'Unknown',
+
+        // 用户自己拒接挂断
+        // cause: 17,
+        // cause_txt: 'User busy',
+        
+        // 用户自己接通后挂断
+        // cause: 16,
+        // cause_txt: 'Normal Clearing',
     });
     channel.originate(
-        { endpoint: 'PJSIP/1002', extension: '1001', callerId: '1001', app: 'momoko8443' },
+        { endpoint: 'PJSIP/1002', extension: '1001', callerId: '1001', app: 'momoko8443',timeout:10 },
         function (err, channel) {
 
         }

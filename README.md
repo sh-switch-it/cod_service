@@ -109,6 +109,30 @@ voice=coqui-tts:zh_baker
 &cache=false
 ```
 
+#Status code table
+## cod task status
+|  cod_status   |  description  |
+|  ----  | ----  |
+| 1  | completed |
+| 2  | init |
+| 3  | tts generating |
+| 4  | ready |
+| 5  | running queue |
+| 6  | cancelled |
+
+## call task
+|  call_status   |  description  |
+|  ----  | ----  |
+| 1  | completed |
+| 2  | init |
+| 3  | tts is ready |
+| 4  | waiting for dailing |
+| 5  | ringing |
+| 6  | in call |
+| 7  | no response |
+| 8  | rejected |
+| 9  | hangup in middle |
+
 
 ##Other
 ```
