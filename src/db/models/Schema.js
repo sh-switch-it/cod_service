@@ -145,21 +145,13 @@ CallRecord.init({
     // attributes
     callee:{
         type: DataTypes.JSON,
-        allowNull: false
+        allowNull: true
     },
     callTime:{
         type: DataTypes.TIME,
-        allowNull: false
-    },
-    retryTimes:{
-        type: DataTypes.INTEGER,
         allowNull: true
     },
     answerTime:{
-        type: DataTypes.TIME,
-        allowNull: true
-    },
-    hangUpTime:{
         type: DataTypes.TIME,
         allowNull: true
     },

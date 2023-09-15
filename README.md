@@ -123,15 +123,12 @@ voice=coqui-tts:zh_baker
 ## call task
 |  call_status   |  description  |
 |  ----  | ----  |
-| 1  | completed |
+| 0  | rejected |
+| 1  | accepted |
 | 2  | init |
 | 3  | tts is ready |
-| 4  | waiting for dailing |
-| 5  | ringing |
-| 6  | in call |
-| 7  | no response |
-| 8  | rejected |
-| 9  | hangup in middle |
+| 4  | calling |
+
 
 
 ##Other

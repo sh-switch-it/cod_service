@@ -47,4 +47,11 @@ codRouter.get('/cod', async(ctx, next) => {
 	ctx.body = result;
 });
 
+codRouter.get('/cod/:id', async(ctx, next) => {
+	const codId = ctx.params.id;
+	const result = await codService.monitorCall(codId);
+	ctx.body = result;
+});
+
+
 module.exports = codRouter;

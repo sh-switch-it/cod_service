@@ -40,7 +40,7 @@ module.exports = {
     //     "retryTimes": 0,
     //     "answerTime": "2023-08-29 11:37:52",
     //     "hangUpTime": "2023-08-29 11:38:52",
-    //     "callStatus": 2,    //2 is init, 3 tts is ready, 4 waiting for dailing, 5 ringing, 6 dialing, 7 no responese,8 reject, 9 hangup in middle ,1 finished 
+    //     "callStatus": 2,    | 0  | rejected || 1  | accepted || 2  | init || 3  | tts is ready || 4  | calling |
     //     "status": 1
     // }],
       for (let i = 0; i < callRecords.length; i++) {
@@ -137,19 +137,38 @@ module.exports = {
     async startCall(codId){
       const codTask = await this.getCodTaskById(codId);
       const callTasks = codTask.callRecords;
-      const promiseAllArray = [];
-      for (let i = 0; i < callTasks.length; i++) {
-        const callTask = callTasks[i];
-        promiseAllArray.push(dialingNumber(callTask, codTask.pendingTime,codTask.retryTimes));
-        
+      //分每组4路并行
+      
+      const maxDial = 4
+      const groupCount = Math.round(callTasks.length / maxDial);
+      for(let l=0;l<groupCount;l++){
+        const promiseAllArray = [];
+        for (let i = 0 + l; i < callTasks.length; i++) {
+          const callTask = callTasks[i];
+          if(callTask.callStatus == 3){
+            await callDAO.update(callTask.id,{callStatus:4});
+            promiseAllArray.push(dialingNumber(callTask, codTask.pendingTime,codTask.retryTimes));   
+          }
+        }
+        const result = await Promise.all(promiseAllArray);
+        await updateCallTasks(result);
       }
-      await Promise.all(promiseAllArray);
       //await dialingNumber(testCallTask, codTask.pendingTime,codTask.retryTimes);
       //await callDAO.update(callTaskId, {callStatus: 3});
     },
 
-    async monitorCall(codId){
-      
-      await callDAO.query({id: codId});
+    async updateCallTasks(callTasks){
+      const promiseAllArray = [];
+      for (let i = 0 + l; i < callTasks.length; i++) {
+          const callTask = callTasks[i];
+          promiseAllArray.push(callDAO.update(callTask.id,callTask));   
+      }
+      const result = await Promise.all(promiseAllArray);
+      return result;
     },
+
+    async monitorCall(codId){
+      const result = await callDAO.query({id: codId});
+      return result;
+    }
   }
