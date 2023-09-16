@@ -47,13 +47,13 @@ function dialingNumber(callTask,pendingTime,retryTimes){
                         resolve(result);
                     });
                 }else if(event.cause === 16 || event.cause === 17){
-                    callTask.answerTime = new Date();
-                    callTask.hangUpTime = new Date();
+                    callTask.answerTime = new Date().toLocaleString();
+                    callTask.hangUpTime = new Date().toLocaleString();
                     callTask.callStatus = 1;
                     resolve(callTask);
                 }else{
-                    callTask.answerTime = new Date();
-                    callTask.hangUpTime = new Date();
+                    callTask.answerTime = new Date().toLocaleString();
+                    callTask.hangUpTime = new Date().toLocaleString();
                     callTask.callStatus = 1;
                     resolve(callTask);
                 }
@@ -71,7 +71,7 @@ function dialingNumber(callTask,pendingTime,retryTimes){
                 // cause_txt: 'Normal Clearing',
                 //resolve();
             });
-            callTask.callTime = new Date();
+            callTask.callTime = new Date().toLocaleString();
             channel.originate(
                 { endpoint:`PJSIP/${phoneNumber}` , extension: '1001', callerId: '1001', app: 'momoko8443',timeout:pendingTime},
                 function (err, outting) {

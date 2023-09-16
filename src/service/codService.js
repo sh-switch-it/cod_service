@@ -1,8 +1,8 @@
 
 const codDAO = require('../db/dao/codDAO');
 const callDAO = require('../db/dao/callDAO');
-const { CallRecord } = require('../db/models/Schema');
 const ttsService2 = require('./ttsService2');
+const config = require('../configReader')().config;
 const { dialingNumber} = require('../pbx/ariClient');
 module.exports = {
 
@@ -139,11 +139,11 @@ module.exports = {
       const callTasks = codTask.callRecords;
       //分每组4路并行
       
-      const maxDial = 4
+      const maxDial = config.pbx.concurrencyCount;
       const groupCount = Math.round(callTasks.length / maxDial);
       for(let l=0;l<groupCount;l++){
         const promiseAllArray = [];
-        for (let i = 0 + l; i < callTasks.length; i++) {
+        for (let i = maxDial * l; i < callTasks.length && i < maxDial * (l + 1)  ; i++) {
           const callTask = callTasks[i];
           if(callTask.callStatus == 3){
             await callDAO.update(callTask.id,{callStatus:4});
@@ -151,15 +151,13 @@ module.exports = {
           }
         }
         const result = await Promise.all(promiseAllArray);
-        await updateCallTasks(result);
+        await this.updateCallTasks(result);
       }
-      //await dialingNumber(testCallTask, codTask.pendingTime,codTask.retryTimes);
-      //await callDAO.update(callTaskId, {callStatus: 3});
     },
 
     async updateCallTasks(callTasks){
       const promiseAllArray = [];
-      for (let i = 0 + l; i < callTasks.length; i++) {
+      for (let i = 0; i < callTasks.length; i++) {
           const callTask = callTasks[i];
           promiseAllArray.push(callDAO.update(callTask.id,callTask));   
       }
@@ -168,7 +166,7 @@ module.exports = {
     },
 
     async monitorCall(codId){
-      const result = await callDAO.query({id: codId});
+      const result = await codDAO.query({id: codId});
       return result;
     }
   }

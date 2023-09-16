@@ -4,7 +4,7 @@ const BaseDAO = require('./BaseDAO');
 const includeCondition = [{
     model: Customer,
     as: "customers",
-    attributes: ["id","name","org","job"],
+    attributes: ["id","name","org","job","phone"],
     through: { attributes: [] }
     }
 ];
