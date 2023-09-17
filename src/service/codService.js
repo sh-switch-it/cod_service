@@ -153,6 +153,7 @@ module.exports = {
         const result = await Promise.all(promiseAllArray);
         await this.updateCallTasks(result);
       }
+      return await codDAO.update(codId,{codStatus: 1});
     },
 
     async updateCallTasks(callTasks){

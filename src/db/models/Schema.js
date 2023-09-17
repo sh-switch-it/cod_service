@@ -148,11 +148,11 @@ CallRecord.init({
         allowNull: true
     },
     callTime:{
-        type: DataTypes.TIME,
+        type: DataTypes.DATE,
         allowNull: true
     },
     answerTime:{
-        type: DataTypes.TIME,
+        type: DataTypes.DATE,
         allowNull: true
     },
     callStatus:{
