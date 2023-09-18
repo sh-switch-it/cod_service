@@ -23,8 +23,14 @@ function dialingNumber(callTask,pendingTime,retryTimes){
                 console.log('StasisStart_event');
                 console.log('channel');//接电话了
                 var playback = ariClient.Playback();
-                incoming.play({ media: `sound:${config.self.url}/public/audio/${callTask.id}` }, playback, function (err) { });
+                incoming.play({ media: `sound:${config.audio.url}/public/audio/${callTask.ttsFileId}` }, playback, function (err) {
+
+                });
+                playback.once('PlaybackStarted', () => {
+                    console.log('PlaybackStarted');
+                });
                 playback.once('PlaybackFinished', () => {
+                    console.log('PlaybackFinished');
                     incoming.hangup();
                 });
         

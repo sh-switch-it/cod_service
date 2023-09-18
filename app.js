@@ -1,5 +1,6 @@
 const { ServerOptions } = require('https');
 const https = require('https');
+const http = require('http');
 const pem = require('pem');
 const Koa = require('koa');
 const sslify = require('koa-sslify').default;
@@ -32,78 +33,78 @@ const ttsService2 = require('./src/service/ttsService2');
 const certProps = {
 	days: 365, // Validity in days
 	selfSigned: true,
-  };
+};
 
 
 
 // const { runKafkaConsumer, kafkaInit } = require('./src/kafka/kafka_processor.js');
 
 let mode = process.env.APP_ENV ? process.env.APP_ENV : "local";
-console.log('mode',mode);
+console.log('mode', mode);
 // var keyPath = mode === 'prod' ? '/etc/letsencrypt/live/booking.openuse.io/privkey.pem' : '/etc/letsencrypt/live/booking.opendais.net/privkey.pem';
 // var certPath = mode === 'prod'?  '/etc/letsencrypt/live/booking.openuse.io/cert.pem' : '/etc/letsencrypt/live/booking.opendais.net/cert.pem';
 
 const app = new Koa();
 app.use(cors({
-  // origin: function(ctx) {
-  //   if (ctx.url === '/test') {
-  //     return false;
-  //   }
-  //   return 'http://127.0.0.1:3000';
-  // },
+	// origin: function(ctx) {
+	//   if (ctx.url === '/test') {
+	//     return false;
+	//   }
+	//   return 'http://127.0.0.1:3000';
+	// },
 	origin: config.web.url,
-  // exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
-  // maxAge: 5,
-  credentials: true,
-  allowMethods: ['GET', 'POST','PATCH','DELETE','PUT','OPTION'],
-  //allowHeaders: ['Content-Type', 'Authorization', 'Accept','Authing-Jwt-Token','authing-jwt-token','pragma','cache-control'],
+	// exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
+	// maxAge: 5,
+	credentials: true,
+	allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT', 'OPTION'],
+	//allowHeaders: ['Content-Type', 'Authorization', 'Accept','Authing-Jwt-Token','authing-jwt-token','pragma','cache-control'],
 }));
 app.use(bodyParser());
 let authRouter = new Router()
 
 app.use(authRouter.routes())
-.use(authRouter.allowedMethods());
+	.use(authRouter.allowedMethods());
 
-    
+
 const staticPath = './build'
 
 console.log(__dirname + '' + staticPath);
 
 async function middlewareCheckAuthingToken(ctx, next) {
-		
-    try {
-      const access_token = ctx.request.headers['authing-jwt-token'];
-      let decoded = TokenUtil.verify(access_token);
-			if(!decoded || !decoded.userName){
-        ctx.response.status = 403;
-			}else{
-				const expired = Date.parse(new Date()) / 1000 > decoded.exp;
-				if (expired) {
-					// 过期
-					ctx.response.status = 403;
-				} else {
-					console.log('token is right');
-					await next();
-				}
+
+	try {
+		const access_token = ctx.request.headers['authing-jwt-token'];
+		let decoded = TokenUtil.verify(access_token);
+		if (!decoded || !decoded.userName) {
+			ctx.response.status = 403;
+		} else {
+			const expired = Date.parse(new Date()) / 1000 > decoded.exp;
+			if (expired) {
+				// 过期
+				ctx.response.status = 403;
+			} else {
+				console.log('token is right');
+				await next();
 			}
-      
-    } catch (error) {
-        console.error(error);
-        ctx.response.status = 403;
-    }
-  }
+		}
+
+	} catch (error) {
+		console.error(error);
+		ctx.response.status = 403;
+	}
+}
 
 authRouter.post('/auth', async (ctx, next) => {
 	const username = ctx.request.body.username;
 	const password = ctx.request.body.password;
 
-	const authUser = await userService.isAuth(username,password);
-	if(authUser){
+	const authUser = await userService.isAuth(username, password);
+	if (authUser) {
 		ctx.body = 'hello ' + authUser.username;
 		const jwtToken = TokenUtil.sign(authUser.username);
 		//await redis.setItem('jwt_' + authUser.username, jwtToken);
 		ctx.body = jwtToken;
-	}else{
+	} else {
 		ctx.response.status = 400;
 	}
 })
@@ -111,22 +112,22 @@ authRouter.post('/auth', async (ctx, next) => {
 authRouter.use('/api/*', middlewareCheckAuthingToken);
 
 
-authRouter.post('/public/tts', async(ctx, next) => {
+authRouter.post('/public/tts', async (ctx, next) => {
 	const body = ctx.request.body;
-	const filename = await ttsService.generateAudio(body.id,body.text);
+	const filename = await ttsService.generateAudio(body.id, body.text);
 	const rstream = fs.createReadStream(filename);
 	ctx.response.set("content-type", "audio/mp3");
 	ctx.body = rstream;
 });
 
 
-authRouter.post('/public/tts2', async(ctx, next) => {
+authRouter.post('/public/tts2', async (ctx, next) => {
 	const body = ctx.request.body;
-	const fileId = await ttsService2.text2SpeechWave(body.id,body.text)
+	const fileId = await ttsService2.text2SpeechWave(body.id, body.text)
 	ctx.body = fileId;
 });
 
-authRouter.get('/public/tts2/:id', async(ctx, next) => {
+authRouter.get('/public/tts2/:id', async (ctx, next) => {
 	const id = ctx.params.id;
 	const rstream = fs.createReadStream(__dirname + `/audio/${id}.wav`);
 	ctx.response.set("content-type", "audio/wav");
@@ -134,7 +135,7 @@ authRouter.get('/public/tts2/:id', async(ctx, next) => {
 });
 
 
-authRouter.get('/public/audio/:id', async(ctx, next) => {
+authRouter.get('/public/audio/:id', async (ctx, next) => {
 	const audioId = ctx.params.id;
 	const rstream = fs.createReadStream(__dirname + `/tts_audio/${audioId}.wav`);
 	ctx.response.set("content-type", "audio/wav");
@@ -149,27 +150,25 @@ authRouter.get('/public/audio/:id', async(ctx, next) => {
 //   })
 //   fs.createReadStream(filePath).pipe(res)
 // })
-const nestedRoutes = [accountRouter,customerRouter,teamRouter,codRouter];
+const nestedRoutes = [accountRouter, customerRouter, teamRouter, codRouter];
 for (var router of nestedRoutes) {
-    authRouter.use(router.routes(), router.allowedMethods())
+	authRouter.use(router.routes(), router.allowedMethods())
 }
 
 
 
-authRouter.get("/", async(ctx, next) => {
+authRouter.get("/", async (ctx, next) => {
 	ctx.type = 'html';
-  ctx.body = fs.createReadStream('./build/index.html');
+	ctx.body = fs.createReadStream('./build/index.html');
 });
 
 app.use(static(
-	path.join( __dirname,  staticPath)
+	path.join(__dirname, staticPath)
 ));
 
-
-if(mode !== "local"){
-	pem.createCertificate(certProps, (error, keys) => {
+pem.createCertificate(certProps, (error, keys) => {
 	if (error) {
-	  throw error;
+		throw error;
 	}
 	const credentials = { key: keys.serviceKey, cert: keys.certificate };
 	const httpsServer = https.createServer(credentials, app.callback());
@@ -179,57 +178,11 @@ if(mode !== "local"){
 		if (success) {
 			console.log('database initialize success');
 		}
-		console.log('app started at port 3010...');
+		console.log('app https started at port 3010...');
 	});
-  });
-
-}else{
-app.listen(3010, async () => {
-    console.log('mode', mode);
-    let success = await dbPreCheck();
-    if (success) {
-        console.log('database initialize success');
-    }
-    console.log('app started at port 3010...');
 });
-}
 
-// if(process.env.APP_ENV !== 'aws' && process.env.APP_ENV !== 'prod'){
-//     app.listen(3010,async ()=>{
-//         console.log('mode',mode);
-//         let success = await dbPreCheck();
-//         await redis.setItem('test','jake.zheng3');
-//         if(success){
-//             console.log('database initialize success');
-//         }
-//         console.log('app started at port 3010...');
-//         let test = await redis.getItem('test');
-//         console.log(test);
-//     });
-// }else{
-//     app.use(sslify());
-//     const opetions = {
-//         key: fs.readFileSync(keyPath),
-//         cert: fs.readFileSync(certPath),
-//     }
-//     https.createServer(opetions,app.app.callback()).listen(3010,async ()=>{
-//         console.log('mode',mode);
-//         let success = await dbPreCheck();
-//         await redis.setItem('test','jake.zheng3');
-//         if(success){
-//             console.log('database initialize success');
-//         }
-//         console.log('app started at port 3010...');
-//         let test = await redis.getItem('test');
-//         console.log(test);
-//     });
-// }
-// const runKafka = async () => {
-//     await kafkaInit();
+app.listen(3011, async () => {
+	console.log('app http started at port 3011...');
+});
 
-//     //runTimeService();
-    
-//     runKafkaConsumer();
-// }
-
-// runKafka();

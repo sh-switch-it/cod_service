@@ -162,6 +162,10 @@ CallRecord.init({
     status: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    ttsFileId:{
+        type: DataTypes.TEXT,
+        allowNull: true
     }
 }, {
     sequelize,

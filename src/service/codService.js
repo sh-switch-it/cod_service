@@ -130,8 +130,8 @@ module.exports = {
     },
 
     async generateTTS(callTaskId, text){
-      const fileId = await ttsService2.text2SpeechWave(callTaskId, text);
-      await callDAO.update(callTaskId, {callStatus: 3});
+      const {callId, fileId} = await ttsService2.text2SpeechWave(callTaskId, text);
+      await callDAO.update(callId, {callStatus: 3, ttsFileId:fileId});
     },
 
     async startCall(codId){
