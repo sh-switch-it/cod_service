@@ -3,6 +3,7 @@ const config = require('../configReader')().config;
 let ariClient;
 client.connect(config.pbx.url, config.pbx.username, config.pbx.password).then(ari => {
     ariClient = ari;
+    console.log('freepbx is online');
 }).catch(err => {
     console.error(err);
 })
