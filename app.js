@@ -27,6 +27,7 @@ const customerRouter = require('./src/routers/customerRouter');
 const teamRouter = require('./src/routers/teamRouter');
 const codRouter = require('./src/routers/codRouter');
 const ttsService2 = require('./src/service/ttsService2');
+const cfgRouter = require('./src/routers/configurationRouter');
 
 
 
@@ -150,7 +151,7 @@ authRouter.get('/public/audio/:id', async (ctx, next) => {
 //   })
 //   fs.createReadStream(filePath).pipe(res)
 // })
-const nestedRoutes = [accountRouter, customerRouter, teamRouter, codRouter];
+const nestedRoutes = [accountRouter, customerRouter, teamRouter, codRouter, cfgRouter];
 for (var router of nestedRoutes) {
 	authRouter.use(router.routes(), router.allowedMethods())
 }

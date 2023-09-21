@@ -33,8 +33,6 @@ function dialingNumber(callTask,pendingTime,retryTimes){
                     console.log('PlaybackFinished');
                     incoming.hangup();
                 });
-        
-        
             });
             channel.on('StasisEnd', function (event, incoming) {
                 console.log('StasisEnd_event');
@@ -45,7 +43,7 @@ function dialingNumber(callTask,pendingTime,retryTimes){
                 console.log('ChannelDestroyed');
                 console.log(event);
                 console.log('channel');//不接电话，直接挂断
-                if(event.cause === 0){
+                if(event.cause === 0 || event.cause === 34){
                     // 超时未接通，挂断
                     // cause: 0,
                     // cause_txt: 'Unknown',
@@ -65,6 +63,10 @@ function dialingNumber(callTask,pendingTime,retryTimes){
                     resolve(callTask);
                 }
                 
+                // cause:
+                // 34
+                // cause_txt:
+                // 'Circuit/channel congestion'
                 // 超时未接通，挂断
                 // cause: 0,
                 // cause_txt: 'Unknown',
@@ -77,19 +79,27 @@ function dialingNumber(callTask,pendingTime,retryTimes){
                 // cause: 16,
                 // cause_txt: 'Normal Clearing',
                 //resolve();
+
+                
             });
             callTask.callTime = new Date();
+            let endpoint = `PJSIP/${phoneNumber}@pstn`;
+            if(phoneNumber.length < 11){
+                endpoint = `PJSIP/${phoneNumber}`;
+            }
+            
+            
             channel.originate(
-                { endpoint:`PJSIP/${phoneNumber}` , extension: '1001', callerId: '1001', app: 'momoko8443',timeout:pendingTime},
+                { endpoint , extension: '1001', callerId: '1001', app: 'momoko8443',timeout:pendingTime},
                 function (err, outting) {
                     if(err){
                         // callTask.answerTime = new Date();
                         // callTask.hangUpTime = new Date();
                         //空号，或者不在线
+                        console.log('originate error:',err);
                         callTask.callStatus = 0;
                         resolve(callTask);
                     }
-                    console.log(err);
                 }
             );
             ariClient.start('momoko8443');

@@ -10,6 +10,7 @@
     "start_txc2": "APP_ENV=txc2 node app.js",
     "start_prod": "APP_ENV=prod node app.js",
     "start_local": "APP_ENV=local node app.js",
+    "start_local2": "APP_ENV=local2 node app.js",
     "migrate": "migrate up --store=./src/state/custom-state-storage",
     "doc": "apidoc -i src/api/ -o docs/apidoc/"
   },
