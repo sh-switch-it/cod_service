@@ -101,10 +101,9 @@ authRouter.post('/auth', async (ctx, next) => {
 
 	const authUser = await userService.isAuth(username, password);
 	if (authUser) {
-		ctx.body = 'hello ' + authUser.username;
 		const jwtToken = TokenUtil.sign(authUser.username);
 		//await redis.setItem('jwt_' + authUser.username, jwtToken);
-		ctx.body = jwtToken;
+		ctx.body = {token:jwtToken, user: authUser};
 	} else {
 		ctx.response.status = 400;
 	}

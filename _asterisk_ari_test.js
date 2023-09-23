@@ -46,7 +46,7 @@
 //     console.log(err);
 // })
 
-const testArray = [1,2,3];
+const testArray = [1];
 function regroup(callTasks){
     const maxDial = 4;
     const groupCount = Math.round(callTasks.length / maxDial);
@@ -65,4 +65,19 @@ function regroup(callTasks){
     return newGroup;
 }
 
-console.log(regroup(testArray));
+
+function regroup2(callTasks){
+    const maxDial = 4;
+    const newGroup = [];
+    for (let i = 0; i < callTasks.length; i++) {
+        const callTask = callTasks[i];
+        let j = i % maxDial;
+        if(!newGroup[j]){
+            newGroup[j] = [];
+        }
+        newGroup[j].push(callTask);
+    }
+    return newGroup;
+}
+
+console.log(regroup2(testArray));

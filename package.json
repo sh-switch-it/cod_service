@@ -18,6 +18,7 @@
     "@koa/multer": "^3.0.2",
     "ari-client": "^2.2.0",
     "axios": "^0.21.0",
+    "bluebird": "^3.7.2",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "faker": "^4.1.0",

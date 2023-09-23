@@ -3,7 +3,8 @@ const codDAO = require('../db/dao/codDAO');
 const callDAO = require('../db/dao/callDAO');
 const ttsService2 = require('./ttsService2');
 const config = require('../configReader')().config;
-const { dialingNumber} = require('../pbx/ariClient');
+const { dialingNumber, dialingNumberTester} = require('../pbx/ariClient');
+const Promise = require("bluebird");
 module.exports = {
 
 
@@ -135,39 +136,71 @@ module.exports = {
     },
 
     async startCall(codId){
-      const codTask = await this.getCodTaskById(codId);
+      const pstnPool = config.pbx.pstnPool;
+      let codTask = await this.getCodTaskById(codId);
       const callTasks = codTask.callRecords;
       //分每组4路并行
-      
-      const maxDial = config.pbx.concurrencyCount;
-      const groupCount = Math.round(callTasks.length / maxDial);
-      for(let l=0;l<groupCount;l++){
-        const promiseAllArray = [];
-        for (let i = maxDial * l; i < callTasks.length && i < maxDial * (l + 1)  ; i++) {
-          const callTask = callTasks[i];
-          if(callTask.callStatus == 3){
-            await callDAO.update(callTask.id,{callStatus:4});
-            promiseAllArray.push(dialingNumber(callTask, codTask.pendingTime,codTask.retryTimes));   
-          }
-        }
-        const result = await Promise.all(promiseAllArray);
-        await this.updateCallTasks(result);
+      const regroup = this.regroup(callTasks);
+      const promiseAllArray = [];
+      for (let i = 0; i < regroup.length; i++) {
+        const group = regroup[i];
+        promiseAllArray.push(Promise.each(group, function(callTask) {
+          return module.exports.wholeCallProcess(pstnPool[i],callTask,codTask.pendingTime,codTask.retryTimes);
+        }));
       }
-      return await codDAO.update(codId,{codStatus: 1});
+      await this.promiseAllFunction(promiseAllArray);
+      codTask = await codDAO.update(codId,{codStatus: 1});
+      return codTask;
     },
 
-    async updateCallTasks(callTasks){
-      const promiseAllArray = [];
-      for (let i = 0; i < callTasks.length; i++) {
-          const callTask = callTasks[i];
-          promiseAllArray.push(callDAO.update(callTask.id,callTask));   
-      }
-      const result = await Promise.all(promiseAllArray);
-      return result;
+    promiseAllFunction(promises){
+      return new Promise((resolve,reject)=>{
+        Promise.all(promises).then((result)=>{
+          resolve(result);
+        })
+      })
     },
 
     async monitorCall(codId){
       const result = await codDAO.query({id: codId});
       return result;
+    },
+
+    regroup(callTasks){
+      const pstnPool = config.pbx.pstnPool;
+      const maxDial = pstnPool.length;
+      const newGroup = [];
+      for (let i = 0; i < callTasks.length; i++) {
+          const callTask = callTasks[i];
+          let j = i % maxDial;
+          if(!newGroup[j]){
+              newGroup[j] = [];
+          }
+          newGroup[j].push(callTask);
+      }
+      return newGroup;
+    },
+
+    wholeCallProcess(pstn,callTask,pendingTime,retryTimes){
+      return new Promise((resolve,reject)=>{
+        callDAO.update(callTask.id,{callStatus:4}).then(()=>{
+          dialingNumberTester(pstn,callTask, pendingTime,retryTimes).then((result)=>{
+            callDAO.update(callTask.id,result).then(()=>{
+              resolve();
+            });
+          })
+        })
+      });
+    },
+
+    asyncSeries(fns) {
+      return fns.reduce(function(p, fn) {
+        return p.then(fn);
+      }, Promise.resolve());
+    },
+     async chainPromise(listOfProviders) {
+      for(let i = 0; i < listOfProviders.length; i++){
+         await listOfProviders[i];
+      }
     }
   }
