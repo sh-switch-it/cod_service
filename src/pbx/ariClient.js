@@ -9,7 +9,7 @@ client.connect(config.pbx.url, config.pbx.username, config.pbx.password).then(ar
     console.error(err);
 });
 
-function dialingNumberTester(pstnPoint,callTask,pendingTime,retryTimes){
+function dialingNumber(pstnPoint,callTask,pendingTime,retryTimes){
     return new Promise((resolve, reject)=>{
         setTimeout(()=>{
             console.log({
