@@ -18,7 +18,7 @@ const TokenUtil = {
     const privateKey = fs.readFileSync(keyPath);
     try{
       const decoded = jwt.verify(token, privateKey);
-      console.log('decoded = '+JSON.stringify(decoded));
+      //console.log('decoded = '+JSON.stringify(decoded));
       return decoded;
     }catch(err){
       console.error(err);

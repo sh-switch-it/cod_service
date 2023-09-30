@@ -1,4 +1,5 @@
 var client = require('ari-client');
+const { phone_number } = require('faker/lib/locales/az');
 const config = require('../configReader')().config;
 let ariClient;
 //const sipTrunkPool = {};
@@ -9,7 +10,7 @@ client.connect(config.pbx.url, config.pbx.username, config.pbx.password).then(ar
     console.error(err);
 });
 
-function dialingNumber(pstnPoint,callTask,pendingTime,retryTimes){
+function dialingNumberTester(pstnPoint,callTask,pendingTime,retryTimes){
     return new Promise((resolve, reject)=>{
         setTimeout(()=>{
             console.log({
@@ -30,7 +31,6 @@ function dialingNumber(pstnPoint,callTask,pendingTime,retryTimes){
             callTask.callStatus = 0;
             resolve(callTask);
         }else{
-            const phoneNumber = JSON.parse(callTask.callee).phone;
             var channel = ariClient.Channel();
             channel.on('StasisStart', function (event, incoming) {
                 console.log('StasisStart_event');
@@ -63,6 +63,7 @@ function dialingNumber(pstnPoint,callTask,pendingTime,retryTimes){
                     // 超时未接通，挂断
                     // cause: 0,
                     // cause_txt: 'Unknown',
+                    console.log('if',event.cause);
                     retryTimes--;
                     return dialingNumber(pstnPoint,callTask,pendingTime,retryTimes).then((result)=>{
                         resolve(result);
@@ -71,11 +72,13 @@ function dialingNumber(pstnPoint,callTask,pendingTime,retryTimes){
                     callTask.answerTime = new Date();
                     callTask.hangUpTime = new Date();
                     callTask.callStatus = 1;
+                    console.log('else if',event.cause);
                     resolve(callTask);
                 }else{
                     callTask.answerTime = new Date();
                     callTask.hangUpTime = new Date();
                     callTask.callStatus = 1;
+                    console.log('else',event.cause);
                     resolve(callTask);
                 }
                 
@@ -99,14 +102,18 @@ function dialingNumber(pstnPoint,callTask,pendingTime,retryTimes){
                 
             });
             callTask.callTime = new Date();
-            let endpoint = `PJSIP/${phoneNumber}@${pstnPoint}`;
-            if(phoneNumber.length < 11){
-                endpoint = `PJSIP/${phoneNumber}`;
+            let phoneNumber = JSON.parse(callTask.callee).phone;
+            if(config.pbx.prefix !== "" && phoneNumber.length === 11){
+                phoneNumber = config.pbx.prefix + "w" + phoneNumber;
             }
+            let endpoint = `PJSIP/${phoneNumber}@pstn`;
+            // let phoneNumber = JSON.parse(callTask.callee).phone;
+            // let endpoint = `PJSIP/${phoneNumber}`;
             
+            console.log('endpoint',endpoint);
             
             channel.originate(
-                { endpoint , extension: '1000', callerId: '1000', app: 'momoko8443',timeout:pendingTime},
+                { endpoint , extension: pstnPoint, callerId: pstnPoint, app: 'momoko8443',timeout:pendingTime},
                 function (err, outting) {
                     if(err){
                         // callTask.answerTime = new Date();

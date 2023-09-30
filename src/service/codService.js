@@ -184,10 +184,12 @@ module.exports = {
     wholeCallProcess(pstn,callTask,pendingTime,retryTimes){
       return new Promise((resolve,reject)=>{
         callDAO.update(callTask.id,{callStatus:4}).then(()=>{
-          dialingNumberTester(pstn,callTask, pendingTime,retryTimes).then((result)=>{
+          dialingNumber(pstn,callTask, pendingTime,retryTimes).then((result)=>{
             callDAO.update(callTask.id,result).then(()=>{
               resolve();
             });
+          }).catch((e)=>{
+            console.log(e);
           })
         })
       });

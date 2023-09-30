@@ -84,7 +84,7 @@ async function middlewareCheckAuthingToken(ctx, next) {
 				// 过期
 				ctx.response.status = 403;
 			} else {
-				console.log('token is right');
+				//console.log('token is right');
 				await next();
 			}
 		}
