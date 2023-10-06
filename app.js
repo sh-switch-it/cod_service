@@ -166,13 +166,18 @@ app.use(static(
 	path.join(__dirname, staticPath)
 ));
 
+const httpsPort = mode === 'docker'? 443 : 3010;
+
+const httpPort = mode === 'docker'? 80 : 3011;
+
+
 pem.createCertificate(certProps, (error, keys) => {
 	if (error) {
 		throw error;
 	}
 	const credentials = { key: keys.serviceKey, cert: keys.certificate };
 	const httpsServer = https.createServer(credentials, app.callback());
-	httpsServer.listen(3010, async () => {
+	httpsServer.listen(httpsPort, async () => {
 		console.log('mode', mode);
 		let success = await dbPreCheck();
 		if (success) {
@@ -182,7 +187,7 @@ pem.createCertificate(certProps, (error, keys) => {
 	});
 });
 
-app.listen(3011, async () => {
+app.listen(httpPort, async () => {
 	console.log('app http started at port 3011...');
 });
 

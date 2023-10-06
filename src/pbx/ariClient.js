@@ -114,7 +114,7 @@ function dialingNumber(pstnPoint,callTask,pendingTime,retryTimes){
             
             channel.originate(
                 { endpoint , extension: pstnPoint, callerId: pstnPoint, app: 'momoko8443',timeout:pendingTime},
-                function (err, outting) {
+                function (err) {
                     if(err){
                         // callTask.answerTime = new Date();
                         // callTask.hangUpTime = new Date();

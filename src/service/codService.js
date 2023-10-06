@@ -4,6 +4,7 @@ const callDAO = require('../db/dao/callDAO');
 const ttsService2 = require('./ttsService2');
 const config = require('../configReader')().config;
 const { dialingNumber, dialingNumberTester} = require('../pbx/ariClient');
+const {Op} = require("sequelize");
 const Promise = require("bluebird");
 module.exports = {
 
@@ -87,6 +88,26 @@ module.exports = {
       return codTasks;
     },
 
+    async getCurrentRunningCodTasks() {
+      let codTasks;
+      const ONE_HOUR = 60 * 60 * 1000 * 24 * 30;
+      try {
+        codTasks = await codDAO.queryAll(
+          {
+              codStatus: {
+                [Op.or]: [2,3]
+              },
+              createdAt: {
+                [Op.between]:[new Date(new Date().getTime() - ONE_HOUR), new Date()]
+              }
+          }
+        );
+      } catch (e) {
+        throw e;
+      }
+      return codTasks;
+    },
+
     async updateCodTask(newCodTask)
     {
       try {
@@ -101,13 +122,14 @@ module.exports = {
         throw e;
       }
     },
-
-    async generateTTSBatch(codId){
+    async generateTTSBatchAsync(codId){
+      console.time();
       let codTaskExist = await codDAO.query({ 'id': codId });
       if(codTaskExist.codStatus === 2){
         const textTemplate = codTaskExist.textTemplate;
         //南部紧急呼叫，[部门]的[姓名][职务]，请于5分钟内,紧急前往[集合地]参与病患救治
         const callTasks = codTaskExist.callRecords;
+        const promiseAllArray = [];
         for (let i = 0; i < callTasks.length; i++) {
           const callTask = callTasks[i];
           if(callTask.callStatus === 2){
@@ -121,10 +143,49 @@ module.exports = {
               .replace('[职务]',job)
               .replace('[集合地]',location);
             console.log(text);
-            await this.generateTTS(callTask.id, text);
+            promiseAllArray.push(this.generateTTS(callTask.id, text));
             console.log('generated sound file');
           }
         }
+        await Promise.all(promiseAllArray);
+        await codDAO.update(codTaskExist.id, {codStatus:3});
+      }
+      console.timeEnd();
+      return await codDAO.query({id:codId});
+    },
+
+    async generateTTSBatch(codId){
+      console.time('tts');
+      let codTaskExist = await codDAO.query({ 'id': codId });
+      if(codTaskExist.codStatus === 2){
+        const textTemplate = codTaskExist.textTemplate;
+        //南部紧急呼叫，[部门]的[姓名][职务]，请于5分钟内,紧急前往[集合地]参与病患救治
+        const callTasks = codTaskExist.callRecords;
+        let promiseAllArray = [];
+        for (let i = 0; i < callTasks.length; i++) {
+          const callTask = callTasks[i];
+          if(callTask.callStatus === 2){
+            const callee = JSON.parse(callTask.callee);
+            const job = callee.job;
+            const org = callee.org;
+            const name = callee.name;
+            const location = callee.location;
+            const text = textTemplate.replace('[部门]',org)
+              .replace('[姓名]',name)
+              .replace('[职务]',job)
+              .replace('[集合地]',location);
+            console.log(text);
+            if(i % 4 === 0){
+              promiseAllArray = [];
+            }
+            promiseAllArray.push(this.generateTTS(callTask.id, text));
+            if(i % 4 === 3){
+              await Promise.all(promiseAllArray);
+            }
+            console.log('generated sound file');
+          }
+        }
+        console.timeEnd('tts');
         await codDAO.update(codTaskExist.id, {codStatus:3});
       }
       return await codDAO.query({id:codId});

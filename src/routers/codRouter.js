@@ -28,7 +28,13 @@ codRouter.post('/cod/:id/calling', async(ctx, next) => {
 });
 
 codRouter.get('/cod', async(ctx, next) => {
+	const query = ctx.request.query;
 	const result = await codService.getCodTasks();
+	ctx.body = result;
+});
+
+codRouter.get('/cod/now', async(ctx, next) => {
+	const result = await codService.getCurrentRunningCodTasks();
 	ctx.body = result;
 });
 

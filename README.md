@@ -114,11 +114,9 @@ voice=coqui-tts:zh_baker
 |  cod_status   |  description  |
 |  ----  | ----  |
 | 1  | completed |
-| 2  | init |
-| 3  | tts generating |
-| 4  | ready |
-| 5  | running queue |
-| 6  | cancelled |
+| 2  | init&ready |
+| 3  | running |
+| 4  | break |
 
 ## call task
 |  call_status   |  description  |
