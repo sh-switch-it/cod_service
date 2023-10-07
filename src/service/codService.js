@@ -78,10 +78,10 @@ module.exports = {
       }
       return team;
     },
-    async getCodTasks() {
+    async getCodTasks(where,order,limit,offset) {
       let codTasks;
       try {
-        codTasks = await codDAO.queryAll();
+        codTasks = await codDAO.queryAllAndCountAll(where, [['createdAt', 'DESC']],limit,offset);
       } catch (e) {
         throw e;
       }

@@ -29,6 +29,19 @@ class CodDAO extends BaseDAO{
         })
         return result;
     }
+
+    async queryAllAndCountAll(condition,sorter,limit,offset){
+        let result = await this.Model.findAndCountAll({          
+            where: condition,
+            order: sorter,
+            limit: limit,
+            offset: offset,
+            include:includeCondition
+        })
+        return result;
+    }
+
+    
 }
 
 module.exports = new CodDAO();

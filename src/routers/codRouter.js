@@ -29,7 +29,9 @@ codRouter.post('/cod/:id/calling', async(ctx, next) => {
 
 codRouter.get('/cod', async(ctx, next) => {
 	const query = ctx.request.query;
-	const result = await codService.getCodTasks();
+	const offset = parseInt(query.offset);
+	const limit = parseInt(query.limit);
+	const result = await codService.getCodTasks(null,null,limit,offset);
 	ctx.body = result;
 });
 
