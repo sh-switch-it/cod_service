@@ -46,7 +46,10 @@ function dialingNumber(pstnPoint,callTask,pendingTime,retryTimes){
                     console.log('PlaybackFinished');
                     incoming.play({ media: `sound:${config.audio.url}/public/audio/${callTask.ttsFileId}` }, playback, function (err) {});
                     playback.once("PlaybackFinished", () => {
-                        incoming.hangup();
+                        incoming.play({ media: `sound:${config.audio.url}/public/audio/${callTask.ttsFileId}` }, playback, function (err) {});
+                        playback.once("PlaybackFinished", () => {
+                            incoming.hangup();
+                        })
                     })
                 });
             });
@@ -103,10 +106,12 @@ function dialingNumber(pstnPoint,callTask,pendingTime,retryTimes){
             });
             callTask.callTime = new Date();
             let phoneNumber = JSON.parse(callTask.callee).phone;
+            let endpoint = `PJSIP/${phoneNumber}`;
             if(config.pbx.prefix !== "" && phoneNumber.length === 11){
                 phoneNumber = config.pbx.prefix + "w" + phoneNumber;
+                endpoint = `PJSIP/${phoneNumber}@pstn`;
             }
-            let endpoint = `PJSIP/${phoneNumber}@pstn`;
+            
             // let phoneNumber = JSON.parse(callTask.callee).phone;
             // let endpoint = `PJSIP/${phoneNumber}`;
             
@@ -119,7 +124,7 @@ function dialingNumber(pstnPoint,callTask,pendingTime,retryTimes){
                         // callTask.answerTime = new Date();
                         // callTask.hangUpTime = new Date();
                         //空号，或者不在线
-                        console.log('originate error:',err);
+                        //console.log('originate error:',err);
                         callTask.callStatus = 0;
                         resolve(callTask);
                     }

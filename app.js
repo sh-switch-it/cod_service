@@ -28,6 +28,7 @@ const teamRouter = require('./src/routers/teamRouter');
 const codRouter = require('./src/routers/codRouter');
 const ttsService2 = require('./src/service/ttsService2');
 const cfgRouter = require('./src/routers/configurationRouter');
+const StopExceptionCodTask = require('./src/db/initializeDB');
 
 
 
@@ -182,6 +183,7 @@ pem.createCertificate(certProps, (error, keys) => {
 		let success = await dbPreCheck();
 		if (success) {
 			console.log('database initialize success');
+			await StopExceptionCodTask();
 		}
 		console.log('app https started at port 3010...');
 	});

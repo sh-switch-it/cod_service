@@ -1,6 +1,7 @@
 const userDAO = require('./dao/userDAO');
 const sequelize = require('./connect');
 const userService = require('../service/userService');
+const codDAO = require('./dao/codDAO');
 
 async function dbPreCheck(){
     try{
@@ -16,5 +17,13 @@ async function dbPreCheck(){
     }
 }
 
-module.exports = dbPreCheck;
+async function StopExceptionCodTask(){
+    const exceptionCodTasks = await codDAO.queryAll({codStatus:3});
+    for (let i = 0; i < exceptionCodTasks.length; i++) {
+        const codTask = exceptionCodTasks[i];
+        await codDAO.update(codTask.id, {codStatus: 4});
+    }
+}
 
+module.exports = dbPreCheck;
+module.exports = StopExceptionCodTask;

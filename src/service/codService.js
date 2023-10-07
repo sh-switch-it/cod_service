@@ -179,7 +179,7 @@ module.exports = {
               promiseAllArray = [];
             }
             promiseAllArray.push(this.generateTTS(callTask.id, text));
-            if(i % 4 === 3){
+            if(i % 4 === 3 || i === callTasks.length -1 ){
               await Promise.all(promiseAllArray);
             }
             console.log('generated sound file');
@@ -194,15 +194,29 @@ module.exports = {
     async generateTTS(callTaskId, text){
       const {callId, fileId} = await ttsService2.text2SpeechWave(callTaskId, text);
       await callDAO.update(callId, {callStatus: 3, ttsFileId:fileId});
+      return fileId;
     },
 
     async startCall(codId){
       const pstnPool = config.pbx.pstnPool;
       let codTask = await this.getCodTaskById(codId);
-      const callTasks = codTask.callRecords;
+      let callTasks = codTask.callRecords;
       //分每组4路并行
-      const regroup = this.regroup(callTasks);
-      const promiseAllArray = [];
+      let regroup = this.regroup(callTasks);
+      let promiseAllArray = [];
+      for (let i = 0; i < regroup.length; i++) {
+        const group = regroup[i];
+        promiseAllArray.push(Promise.each(group, function(callTask) {
+          return module.exports.wholeCallProcess(pstnPool[i],callTask,codTask.pendingTime,codTask.retryTimes);
+        }));
+      }
+      await this.promiseAllFunction(promiseAllArray);
+      //call second round
+      codTask = await this.getCodTaskById(codId);
+      callTasks = codTask.callRecords.filter((item) => { return item.callStatus === 0});
+
+      regroup = this.regroup(callTasks);
+      promiseAllArray = [];
       for (let i = 0; i < regroup.length; i++) {
         const group = regroup[i];
         promiseAllArray.push(Promise.each(group, function(callTask) {
@@ -246,7 +260,12 @@ module.exports = {
       return new Promise((resolve,reject)=>{
         callDAO.update(callTask.id,{callStatus:4}).then(()=>{
           dialingNumber(pstn,callTask, pendingTime,retryTimes).then((result)=>{
-            callDAO.update(callTask.id,result).then(()=>{
+            callDAO.update(callTask.id,{
+              answerTime: result.answerTime,
+              hangUpTime:result.hangUpTime,
+              callStatus:result.callStatus
+            }).then((result2)=>{
+              console.log(result2);
               resolve();
             });
           }).catch((e)=>{
