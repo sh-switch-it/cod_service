@@ -1,0 +1,37 @@
+version: '3'
+services:
+  nginx-load-balancing:
+    image: nginx:alpine
+    container_name: nginx-load-balancing
+    ports:
+      - "15500:5500"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - tts-server1
+      - tts-server2
+      - tts-server3
+      - tts-server4
+  tts-server1:
+    image: synesthesiam/opentts:zh
+    container_name: tts-server1
+    command: --no-espeak
+
+  tts-server2:
+    image: synesthesiam/opentts:zh
+    container_name: tts-server2
+    command: --no-espeak
+
+  tts-server3:
+    image: synesthesiam/opentts:zh
+    container_name: tts-server3
+    command: --no-espeak
+
+  tts-server4:
+    image: synesthesiam/opentts:zh
+    container_name: tts-server4
+    command: --no-espeak
+
+networks:
+  default:
+    driver: bridge
