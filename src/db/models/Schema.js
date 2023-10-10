@@ -166,6 +166,10 @@ CallRecord.init({
     ttsFileId:{
         type: DataTypes.TEXT,
         allowNull: true
+    },
+    outboundNumber:{
+        type: DataTypes.TEXT,
+        allowNull: true
     }
 }, {
     sequelize,
