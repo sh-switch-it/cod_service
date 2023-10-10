@@ -156,6 +156,7 @@ module.exports = {
 
     async generateTTSBatch(codId){
       console.time('tts');
+      const ttsNodeCount = config.tts.nodeCount;
       let codTaskExist = await codDAO.query({ 'id': codId });
       if(codTaskExist.codStatus === 2){
         const textTemplate = codTaskExist.textTemplate;
@@ -175,11 +176,11 @@ module.exports = {
               .replace('[职务]',job)
               .replace('[集合地]',location);
             console.log(text);
-            if(i % 4 === 0){
+            if(i % ttsNodeCount === 0){
               promiseAllArray = [];
             }
             promiseAllArray.push(this.generateTTS(callTask.id, text));
-            if(i % 4 === 3 || i === callTasks.length -1 ){
+            if(i % ttsNodeCount === ttsNodeCount - 1 || i === callTasks.length -1 ){
               await Promise.all(promiseAllArray);
             }
             console.log('generated sound file');
