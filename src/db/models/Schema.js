@@ -166,11 +166,12 @@ CallRecord.init({
     ttsFileId:{
         type: DataTypes.TEXT,
         allowNull: true
-    },
-    outboundNumber:{
-        type: DataTypes.TEXT,
-        allowNull: true
     }
+    ,
+    outboundnumber:{
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
 }, {
     sequelize,
     freezeTableName: true,

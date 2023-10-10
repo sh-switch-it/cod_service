@@ -259,7 +259,7 @@ module.exports = {
 
     wholeCallProcess(pstn,callTask,pendingTime,retryTimes){
       return new Promise((resolve,reject)=>{
-        callDAO.update(callTask.id,{outboundNumber:pstn,callStatus:4}).then(()=>{
+        callDAO.update(callTask.id,{outboundnumber:pstn,callStatus:4}).then(()=>{
           dialingNumber(pstn,callTask, pendingTime,retryTimes).then((result)=>{
             callDAO.update(callTask.id,{
               answerTime: result.answerTime,
