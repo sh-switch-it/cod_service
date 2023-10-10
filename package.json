@@ -39,6 +39,7 @@
     "lodash": "^4.17.20",
     "lowdb": "^1.0.0",
     "moment": "^2.29.1",
+    "mp3-to-wav": "^0.1.11",
     "multer": "^1.4.5-lts.1",
     "multiparty": "^4.2.2",
     "node-json-db": "^2.2.0",

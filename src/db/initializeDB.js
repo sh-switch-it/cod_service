@@ -2,6 +2,8 @@ const userDAO = require('./dao/userDAO');
 const sequelize = require('./connect');
 const userService = require('../service/userService');
 const codDAO = require('./dao/codDAO');
+const customerDAO = require('./dao/customerDAO');
+const configurationDAO = require('./dao/configurationDAO');
 
 async function dbPreCheck(){
     try{
@@ -25,5 +27,19 @@ async function StopExceptionCodTask(){
     }
 }
 
+async function syncOrgList(){
+    const result = await customerDAO.getOrgList();
+    console.log(result);
+    await configurationDAO.updateOrgList(result);
+}
+
+async function syncJobList(){
+    const result = await customerDAO.getJobList();
+    console.log(result);
+    await configurationDAO.updateJobList(result);
+}
+
 module.exports = dbPreCheck;
 module.exports = StopExceptionCodTask;
+module.exports = syncOrgList;
+module.exports = syncJobList;

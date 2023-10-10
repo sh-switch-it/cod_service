@@ -36,6 +36,7 @@ class CodDAO extends BaseDAO{
             order: sorter,
             limit: limit,
             offset: offset,
+            distinct: true,
             include:includeCondition
         })
         return result;
