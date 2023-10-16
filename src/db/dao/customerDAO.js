@@ -7,11 +7,22 @@ class CustomerDAO extends BaseDAO{
     }
 
     async getOrgList(){
-        return await this.Model.aggregate('org', 'DISTINCT', { plain: false }).map( item => item.DISTINCT);
+        try{
+            return await this.Model.aggregate('org', 'DISTINCT', { plain: false }).map( item => item.DISTINCT);
+        }catch(e){
+            console.log(e);
+            return [];
+        }
     }
 
     async getJobList(){
-        return await this.Model.aggregate('job', 'DISTINCT', { plain: false }).map( item => item.DISTINCT);
+        try{
+            return await this.Model.aggregate('job', 'DISTINCT', { plain: false }).map( item => item.DISTINCT);
+        }
+        catch(e){
+            console.log(e);
+            return [];
+        }
     }
 }
 

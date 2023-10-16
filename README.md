@@ -133,7 +133,9 @@ voice=coqui-tts:zh_baker
 ```
 docker run -p 18080:8080 -e SWAGGER_JSON_URL=http://192.168.31.163:8088/ari/api-docs/resources.json?api_key=asterisk:123456 swaggerapi/swagger-ui
 ```
-
+```
+docker network create -d bridge --subnet 172.25.0.0/16 cod_network
+```
 
 #Centos安装
 ##1 安装docker

@@ -7,7 +7,7 @@ const sslify = require('koa-sslify').default;
 const fs = require('fs');
 const Router = require('koa-router');
 // const configReader = require('./src/configReader.js');
-const dbPreCheck = require('./src/db/initializeDB');
+const {dbPreCheck} = require('./src/db/initializeDB');
 const helmet = require("koa-helmet");
 const static = require('koa-static');
 const path = require('path');
@@ -28,9 +28,9 @@ const teamRouter = require('./src/routers/teamRouter');
 const codRouter = require('./src/routers/codRouter');
 const ttsService2 = require('./src/service/ttsService2');
 const cfgRouter = require('./src/routers/configurationRouter');
-const StopExceptionCodTask = require('./src/db/initializeDB');
-const syncOrgList = require('./src/db/initializeDB');
-
+const {StopExceptionCodTask} = require('./src/db/initializeDB');
+const {syncOrgList} = require('./src/db/initializeDB');
+const {syncJobList} = require('./src/db/initializeDB');
 
 
 const certProps = {

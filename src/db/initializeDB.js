@@ -39,7 +39,4 @@ async function syncJobList(){
     await configurationDAO.updateJobList(result);
 }
 
-module.exports = dbPreCheck;
-module.exports = StopExceptionCodTask;
-module.exports = syncOrgList;
-module.exports = syncJobList;
+module.exports =  { dbPreCheck, StopExceptionCodTask,syncOrgList,syncJobList}
