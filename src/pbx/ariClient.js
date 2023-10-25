@@ -107,7 +107,7 @@ function dialingNumber(pstnPoint,callTask,pendingTime,retryTimes){
             callTask.callTime = new Date();
             let phoneNumber = JSON.parse(callTask.callee).phone;
             let endpoint = `PJSIP/${phoneNumber}`;
-            if(config.pbx.prefix !== "" && phoneNumber.length === 11){
+            if(config.pbx.prefix !== "" && (phoneNumber.length === 11 || phoneNumber.length === 12)){
                 phoneNumber = config.pbx.prefix + "w" + phoneNumber;
                 endpoint = `PJSIP/${phoneNumber}@pstn`;
             }
