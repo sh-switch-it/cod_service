@@ -109,7 +109,7 @@ TeamCustomer.init({
 },{
     sequelize,
     freezeTableName: true,
-    tableName: 'team_customer',
+    tableName: 'TeamCustomer',
 });
 
 Team.belongsToMany(Customer, { through: TeamCustomer,as: 'customers'});
