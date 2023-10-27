@@ -1,5 +1,5 @@
-const CallRecord = require('../models/Schema').CallRecord;
-const BaseDAO = require('./BaseDAO');
+import { CallRecord } from '../models/Schema';
+import BaseDAO from './BaseDAO';
 
 class CallDAO extends BaseDAO{
     constructor(){
@@ -7,4 +7,4 @@ class CallDAO extends BaseDAO{
     }
 }
 
-module.exports = new CallDAO();
+export default new CallDAO();

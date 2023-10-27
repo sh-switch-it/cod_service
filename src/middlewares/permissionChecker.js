@@ -1,4 +1,4 @@
-module.exports = function(app, allowedPermissions) {
+export default function(app, allowedPermissions) {
     return async (ctx,next)=>{
         if(allowedPermissions && allowedPermissions.length > 0){
             console.log('allowedPermissions',allowedPermissions);
@@ -29,7 +29,7 @@ module.exports = function(app, allowedPermissions) {
             await next(); 
         }
     }
-}
+};
 
 function hasPermission(userPermissions, allowedPermissions){
     for (let i = 0; i < userPermissions.length; i++) {

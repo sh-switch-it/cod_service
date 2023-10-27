@@ -1,6 +1,6 @@
 
-const Router = require('koa-router');
-const userService = require('../service/userService');
+import Router from 'koa-router';
+import userService from '../service/userService';
 const accountRouter = new Router({prefix:'/api'});
 
 accountRouter.get('/accounts', async(ctx, next)=>{
@@ -36,4 +36,4 @@ accountRouter.delete('/accounts/:id', async(ctx, next)=>{
 	ctx.body = result;
 })
 
-module.exports = accountRouter;
+export default accountRouter;

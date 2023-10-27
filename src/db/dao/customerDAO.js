@@ -1,6 +1,5 @@
-const Customer = require('../models/Schema').Customer;
-const { Sequelize } = require('sequelize');
-const BaseDAO = require('./BaseDAO');
+import { Customer } from '../models/Schema';
+import BaseDAO from './BaseDAO';
 class CustomerDAO extends BaseDAO{
     constructor(){
         super(Customer);
@@ -28,4 +27,4 @@ class CustomerDAO extends BaseDAO{
 
 
 
-module.exports = new CustomerDAO();
+export default new CustomerDAO();

@@ -1,11 +1,10 @@
-const {createHash} = require("crypto");
-const userDAO = require("../db/dao/userDAO");
-const { async } = require("q");
+import { createHash } from 'crypto';
+import userDAO from '../db/dao/userDAO';
 function sha256(content) {  
   return createHash ('sha3-256').update(content).digest('hex')
 }
 
-module.exports = {
+export default {
   checkPasswordFormat(password){
     const pattern = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return pattern.test(password);
@@ -70,4 +69,4 @@ module.exports = {
   async removeUser(id){
     return await userDAO.patchUpdate (id,{status:0});
   }
-}
+};

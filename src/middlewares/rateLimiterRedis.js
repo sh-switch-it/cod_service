@@ -1,6 +1,7 @@
-const redis = require('redis');
-const { RateLimiterRedis } = require('rate-limiter-flexible');
-const config = require('../configReader')().config;
+import redis from 'redis';
+import { RateLimiterRedis } from 'rate-limiter-flexible';
+import { getConfigReader } from '../configReader';
+const config = getConfigReader().getConfig();
 const url = config.redis.url;
 const port = config.redis.port;
 const redisClient = redis.createClient({
@@ -28,4 +29,4 @@ function rateLimiterMiddleware(){
     }
 }
 
-module.exports = rateLimiterMiddleware;
+export default rateLimiterMiddleware;

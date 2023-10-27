@@ -1,6 +1,6 @@
-const teamDAO = require('../db/dao/teamDAO');
+import teamDAO from '../db/dao/teamDAO';
 
-module.exports = {
+export default {
     async addCustomer(team_id, customer_id) {
       const team = await this.getTeamById(team_id);
       return await team.addCustomer(customer_id);
@@ -96,4 +96,4 @@ module.exports = {
         throw e;
       }
     },
-  }
+  };

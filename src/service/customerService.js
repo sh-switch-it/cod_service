@@ -1,6 +1,6 @@
-const customerDAO = require('../db/dao/customerDAO');
+import customerDAO from '../db/dao/customerDAO';
 
-module.exports = {
+export default {
     async addCustomer(name, phone, org, job) {
         let createdCustomer;
         try{
@@ -81,4 +81,4 @@ module.exports = {
             throw e;
         }
     },
-}
+};

@@ -1,6 +1,7 @@
-const config = require('../configReader')().config;
-const Sequelize = require('sequelize');
+import { getConfigReader } from '../configReader';
+import Sequelize from 'sequelize';
 
+const config = getConfigReader().getConfig();
 const url = config.db.url;
 const port = config.db.port;
 const user = config.db.username;
@@ -23,4 +24,4 @@ const sequelize = new Sequelize(dbname,user,pass,
     });
 
 
-module.exports = sequelize;
+export default sequelize;

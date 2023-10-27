@@ -1,12 +1,16 @@
 
-const codDAO = require('../db/dao/codDAO');
-const callDAO = require('../db/dao/callDAO');
-const ttsService2 = require('./ttsService2');
-const config = require('../configReader')().config;
-const { dialingNumber, dialingNumberTester} = require('../pbx/ariClient');
-const {Op} = require("sequelize");
-const Promise = require("bluebird");
-module.exports = {
+import codDAO from '../db/dao/codDAO';
+import callDAO from '../db/dao/callDAO';
+import ttsService2 from './ttsService2';
+import { getConfigReader } from '../configReader';
+import ariClient from '../pbx/ariClient';
+import sequelize from 'sequelize';
+import Promise from 'bluebird';
+const {dialingNumber} = ariClient;
+const config = getConfigReader().getConfig();
+const { Op } = sequelize;
+
+export default {
 
 
     //status: 2 init, 3 tts generating, 4 ready, 5 running queue, 6 is canceled, 1 is finished ,, 
@@ -208,27 +212,45 @@ module.exports = {
       for (let i = 0; i < regroup.length; i++) {
         const group = regroup[i];
         promiseAllArray.push(Promise.each(group, function(callTask) {
-          return module.exports.wholeCallProcess(pstnPool[i],callTask,codTask.pendingTime,codTask.retryTimes);
+          return wholeCallProcess(pstnPool[i], callTask, codTask);
         }));
       }
       await this.promiseAllFunction(promiseAllArray);
+
       //call second round
       codTask = await this.getCodTaskById(codId);
-      callTasks = codTask.callRecords.filter((item) => { return item.callStatus === 0});
+      if(codTask.codStatus === 3){
+      
+        codTask = await this.getCodTaskById(codId);
+        callTasks = codTask.callRecords.filter((item) => { return item.callStatus === 0});
 
-      regroup = this.regroup(callTasks);
-      promiseAllArray = [];
-      for (let i = 0; i < regroup.length; i++) {
-        const group = regroup[i];
-        promiseAllArray.push(Promise.each(group, function(callTask) {
-          return module.exports.wholeCallProcess(pstnPool[i],callTask,codTask.pendingTime,codTask.retryTimes);
-        }));
+        regroup = this.regroup(callTasks);
+        promiseAllArray = [];
+        for (let i = 0; i < regroup.length; i++) {
+          const group = regroup[i];
+          promiseAllArray.push(Promise.each(group, function(callTask) {
+            return wholeCallProcess(pstnPool[i], callTask, codTask);
+          }));
+        }
+        await this.promiseAllFunction(promiseAllArray);
       }
-      await this.promiseAllFunction(promiseAllArray);
-      codTask = await codDAO.update(codId,{codStatus: 1});
+      codTask = await this.getCodTaskById(codId);
+      if(codTask.codStatus === 3){
+        codTask = await codDAO.update(codId,{codStatus: 1});
+      }
       return codTask;
     },
-
+    async cancelCall(codId){
+      let cod = await codDAO.update(codId, {codStatus: 4});
+      cod = await this.getCodTaskById(codId);
+      for (let i = 0; i < cod.callRecords.length; i++) {
+        const callTask = cod.callRecords[i];
+        if(callTask.callStatus === 2 || callTask.callStatus === 3 || callTask.callStatus === 4){
+          await callDAO.update(callTask.id,{callStatus:5});
+        }
+      }
+      return await this.getCodTaskById(codId);
+    },
     promiseAllFunction(promises){
       return new Promise((resolve,reject)=>{
         Promise.all(promises).then((result)=>{
@@ -257,33 +279,36 @@ module.exports = {
       return newGroup;
     },
 
-    wholeCallProcess(pstn,callTask,pendingTime,retryTimes){
+    wholeCallProcess(pstn,callTask,codTask){
       return new Promise((resolve,reject)=>{
         callDAO.update(callTask.id,{outboundnumber:pstn,callStatus:4}).then(()=>{
-          dialingNumber(pstn,callTask, pendingTime,retryTimes).then((result)=>{
-            callDAO.update(callTask.id,{
-              answerTime: result.answerTime,
-              hangUpTime:result.hangUpTime,
-              callStatus:result.callStatus
-            }).then((result2)=>{
-              console.log(result2);
-              resolve();
-            });
-          }).catch((e)=>{
-            console.log(e);
-          })
+          //check cod task is canceled manually？
+          this.getCodTaskById(codTask.id).then((cod)=>{
+            if(cod.codStatus === 4){
+              callDAO.update(callTask.id,{
+                callStatus:5
+              }).then(()=>{
+                resolve();
+              });
+            }else if(cod.codStatus === 3){
+              dialingNumber(pstn,callTask, codTask.pendingTime,codTask.retryTimes).then((result)=>{
+                callDAO.update(callTask.id,{
+                  answerTime: result.answerTime,
+                  hangUpTime:result.hangUpTime,
+                  callStatus:result.callStatus
+                }).then(()=>{
+                  console.log();
+                  resolve();
+                });
+              }).catch((e)=>{
+                console.log(e);
+                reject();
+              })
+            }else{
+              reject();
+            }
+          });
         })
       });
     },
-
-    asyncSeries(fns) {
-      return fns.reduce(function(p, fn) {
-        return p.then(fn);
-      }, Promise.resolve());
-    },
-     async chainPromise(listOfProviders) {
-      for(let i = 0; i < listOfProviders.length; i++){
-         await listOfProviders[i];
-      }
-    }
-  }
+  };

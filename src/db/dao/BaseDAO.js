@@ -51,4 +51,4 @@ class BaseDAO {
     }
 }
 
-module.exports = BaseDAO;
+export default BaseDAO;

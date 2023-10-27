@@ -116,7 +116,7 @@ voice=coqui-tts:zh_baker
 | 1  | completed |
 | 2  | init&ready |
 | 3  | running |
-| 4  | break |
+| 4  | canceled |
 
 ## call task
 |  call_status   |  description  |
@@ -126,6 +126,7 @@ voice=coqui-tts:zh_baker
 | 2  | init |
 | 3  | tts is ready |
 | 4  | calling |
+| 5  | canceled |
 
 
 

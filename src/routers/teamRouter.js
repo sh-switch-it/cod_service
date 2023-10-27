@@ -1,6 +1,6 @@
 
-const Router = require('koa-router');
-const teamService = require('../service/teamService');
+import Router from 'koa-router';
+import teamService from '../service/teamService';
 const teamRouter = new Router({ prefix: '/api' });
 
 teamRouter.get('/teams', async (ctx, next) => {
@@ -43,4 +43,4 @@ teamRouter.delete('/teams/:id', async(ctx, next) => {
     ctx.body = result;
 })
 
-module.exports = teamRouter;
+export default teamRouter;

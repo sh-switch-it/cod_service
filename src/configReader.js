@@ -1,10 +1,9 @@
-let fs = require("fs");
-var instance
-
+import fs from "fs";
+var instance;
 function ConfigReader() {
     let mode = process.env.APP_ENV ? process.env.APP_ENV : "local";
     console.log('env.mode', mode);
-    let filePath = './config/' + mode + '.env.json'
+    let filePath = './config/' + mode + '.env.json';
     this.config = JSON.parse(fs.readFileSync(filePath));
     // if(mode !== 'local'){
     //     this.config.oauth.client_secret = process.env.OAUTH_CLIENT_SECRET;
@@ -14,15 +13,12 @@ function ConfigReader() {
     //console.log('full config',this.config );
 }
 ConfigReader.prototype.getConfig = function () {
-    return this.config
-}
-
-function getConfigReader() {
-    if(!instance) {
-        console.log("reload config")
-        instance = new ConfigReader()
+    return this.config;
+};
+export function getConfigReader() {
+    if (!instance) {
+        console.log("reload config");
+        instance = new ConfigReader();
     }
-    return instance
-}
-
-module.exports = getConfigReader
+    return instance;
+};

@@ -1,6 +1,6 @@
-const Team = require('../models/Schema').Team;
-const { Customer } = require('../models/Schema');
-const BaseDAO = require('./BaseDAO');
+import { Team } from '../models/Schema';
+import { Customer } from '../models/Schema';
+import BaseDAO from './BaseDAO';
 const includeCondition = [{
     model: Customer,
     as: "customers",
@@ -33,4 +33,4 @@ class TeamDAO extends BaseDAO{
     }
 }
 
-module.exports = new TeamDAO();
+export default new TeamDAO();

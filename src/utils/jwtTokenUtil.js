@@ -1,9 +1,11 @@
-const jwt = require('jsonwebtoken');
-const fs = require('fs');
-const path = require('path');
-
+import jwt from 'jsonwebtoken';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+const __dirname = dirname(fileURLToPath(import.meta.url))
 // var token = jwt.sign({ foo: 'bar' }, privateKey, { algorithm: 'RS256' })
-const TokenUtil = {
+export const TokenUtil = {
   sign: function(userName){
     const payload = { userName };
     const keyPath = path.join(__dirname, '../auth/jwt_key/jwtRS256_cod.key');
@@ -24,7 +26,4 @@ const TokenUtil = {
       console.error(err);
     }
   },
-}
-module.exports = {
-  TokenUtil
 }

@@ -1,5 +1,5 @@
-const User = require('../models/Schema').User;
-const BaseDAO = require('./BaseDAO');
+import { User } from '../models/Schema';
+import BaseDAO from './BaseDAO';
 class UserDAO extends BaseDAO{
     constructor(){
         super(User);
@@ -21,4 +21,4 @@ class UserDAO extends BaseDAO{
 
 
 
-module.exports = new UserDAO();
+export default new UserDAO();

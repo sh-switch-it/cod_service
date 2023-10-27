@@ -1,14 +1,15 @@
-const axios = require('axios');
-const config = require('../configReader')().config;
-const fs = require('fs');
-const path = require('path');
+import axios from 'axios';
+import { getConfigReader } from '../configReader';
+import fs from 'fs';
+import path from 'path';
+import wavefile from 'wavefile';
+import crypto from 'crypto';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+const config = getConfigReader().getConfig();
 const openTTS_URL = config.tts.url;
-const wavefile = require('wavefile');
-
-const crypto = require('crypto');
-const { exec } = require('child_process');
-
-module.exports = {
+const __dirname = dirname(fileURLToPath(import.meta.url))
+export default {
   async text2SpeechWave(call_id, text) {
     const fileName = crypto.createHash('md5').update(text).digest('hex');
     let filePath = path.join(__dirname, '../../tts_audio/');

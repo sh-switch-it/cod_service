@@ -1,5 +1,6 @@
-const {Sequelize,DataTypes} = require('sequelize');
-const sequelize = require('../connect');
+import pkg from 'sequelize';
+import sequelize from '../connect';
+const { Sequelize, DataTypes } = pkg;
 const Model = Sequelize.Model;
 class User extends Model {}
 User.init({
@@ -187,10 +188,10 @@ CallRecord.belongsTo(CodRecord);
 
 
 
-module.exports = {
-    'User':User,
-    //'Customer':Customer,
-    'Team': Team,
-    'CodRecord': CodRecord,
-    'CallRecord': CallRecord
-}
+export {
+    User,
+    Customer,
+    Team,
+    CodRecord,
+    CallRecord
+};

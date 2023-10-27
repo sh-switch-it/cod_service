@@ -11,4 +11,4 @@ function errorHandlerMiddleware(){
     }
 }
 
-module.exports = errorHandlerMiddleware;
+export default errorHandlerMiddleware;

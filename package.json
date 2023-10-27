@@ -1,6 +1,7 @@
 {
   "name": "cod-server",
   "version": "1.0.0",
+  "type": "module",
   "keywords": [
     "koa2"
   ],

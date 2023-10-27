@@ -1,6 +1,6 @@
 
-const Router = require('koa-router');
-const codService = require('../service/codService');
+import Router from 'koa-router';
+import codService from '../service/codService';
 const codRouter = new Router({prefix:'/api'});
 codRouter.post('/cod', async(ctx, next) => {
 	let body = ctx.request.body;
@@ -27,6 +27,12 @@ codRouter.post('/cod/:id/calling', async(ctx, next) => {
 	ctx.body = result;
 });
 
+codRouter.post('/cod/:id/cancel', async(ctx, next) => {
+	const codId = ctx.params.id;
+	const result = await codService.cancelCall(codId);
+	ctx.body = result;
+});
+
 codRouter.get('/cod', async(ctx, next) => {
 	const query = ctx.request.query;
 	const offset = parseInt(query.offset);
@@ -47,4 +53,4 @@ codRouter.get('/cod/:id', async(ctx, next) => {
 });
 
 
-module.exports = codRouter;
+export default codRouter;

@@ -1,6 +1,6 @@
 
-const Router = require('koa-router');
-const cfgDAO = require('../db/dao/configurationDAO');
+import Router from 'koa-router';
+import cfgDAO from '../db/dao/configurationDAO';
 const cfgRouter = new Router({prefix:'/api'});
 
 cfgRouter.get('/job', async(ctx, next) => {
@@ -27,4 +27,4 @@ cfgRouter.get('/role', async(ctx, next) => {
 
 
 
-module.exports = cfgRouter;
+export default cfgRouter;

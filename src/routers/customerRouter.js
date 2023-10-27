@@ -1,12 +1,15 @@
 
-const Router = require('koa-router');
-const multer = require('@koa/multer');
-const readXlsxFile = require('read-excel-file/node');
-const writeXlsxFile = require('write-excel-file/node');
-const customerService = require('../service/customerService');
-const configurationDAO = require('../db/dao/configurationDAO');
-const fs = require('fs');
-const path = require('path');
+import Router from 'koa-router';
+import multer from '@koa/multer';
+import readXlsxFile from 'read-excel-file/node';
+import writeXlsxFile from 'write-excel-file/node';
+import customerService from '../service/customerService';
+import configurationDAO from '../db/dao/configurationDAO';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+const __dirname = dirname(fileURLToPath(import.meta.url))
 const storage = multer.diskStorage({
 	destination: function (req, file, cb) {
 		const filePath = path.resolve(__dirname, '../../upload_temp');
@@ -140,4 +143,4 @@ customerRouter.get(
 	}
 );
 
-module.exports = customerRouter;
+export default customerRouter;

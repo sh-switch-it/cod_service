@@ -1,9 +1,9 @@
-const userDAO = require('./dao/userDAO');
-const sequelize = require('./connect');
-const userService = require('../service/userService');
-const codDAO = require('./dao/codDAO');
-const customerDAO = require('./dao/customerDAO');
-const configurationDAO = require('./dao/configurationDAO');
+import userDAO from './dao/userDAO';
+import sequelize from './connect';
+import userService from '../service/userService';
+import codDAO from './dao/codDAO';
+import customerDAO from './dao/customerDAO';
+import configurationDAO from './dao/configurationDAO';
 
 async function dbPreCheck(){
     try{
@@ -39,4 +39,4 @@ async function syncJobList(){
     await configurationDAO.updateJobList(result);
 }
 
-module.exports =  { dbPreCheck, StopExceptionCodTask,syncOrgList,syncJobList}
+export { dbPreCheck, StopExceptionCodTask,syncOrgList,syncJobList};

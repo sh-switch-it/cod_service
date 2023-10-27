@@ -1,37 +1,38 @@
-const { ServerOptions } = require('https');
-const https = require('https');
-const http = require('http');
-const pem = require('pem');
-const Koa = require('koa');
-const sslify = require('koa-sslify').default;
-const fs = require('fs');
-const Router = require('koa-router');
+import https from 'https';
+import pem from 'pem';
+import Koa from 'koa';
+import fs from 'fs';
+import Router from 'koa-router';
+
 // const configReader = require('./src/configReader.js');
-const {dbPreCheck} = require('./src/db/initializeDB');
-const helmet = require("koa-helmet");
-const static = require('koa-static');
-const path = require('path');
-const bodyParser = require('koa-bodyparser');
-const userService = require('./src/service/userService');
+import { dbPreCheck } from './src/db/initializeDB.js';
+
+import serve from 'koa-static';
+import path from 'path';
+import bodyParser from 'koa-bodyparser';
+import userService from './src/service/userService.js';
+
 //const redis = require('./src/redis/connect');
 
-const { TokenUtil } = require('./src/utils/jwtTokenUtil');
-const cors = require('koa2-cors');
+import { TokenUtil } from './src/utils/jwtTokenUtil.js';
 
-const config = require('./src/configReader')().config;
+import cors from 'koa2-cors';
+import { getConfigReader } from './src/configReader.js';
+const config = getConfigReader().getConfig();
 
-const ttsService = require('./src/service/ttsService');
+import accountRouter from './src/routers/accountRouter';
+import customerRouter from './src/routers/customerRouter';
+import teamRouter from './src/routers/teamRouter';
+import codRouter from './src/routers/codRouter';
+import ttsService2 from './src/service/ttsService2';
+import cfgRouter from './src/routers/configurationRouter';
+import { StopExceptionCodTask } from './src/db/initializeDB';
+import { syncOrgList } from './src/db/initializeDB';
+import { syncJobList } from './src/db/initializeDB';
 
-const accountRouter = require('./src/routers/accountRouter');
-const customerRouter = require('./src/routers/customerRouter');
-const teamRouter = require('./src/routers/teamRouter');
-const codRouter = require('./src/routers/codRouter');
-const ttsService2 = require('./src/service/ttsService2');
-const cfgRouter = require('./src/routers/configurationRouter');
-const {StopExceptionCodTask} = require('./src/db/initializeDB');
-const {syncOrgList} = require('./src/db/initializeDB');
-const {syncJobList} = require('./src/db/initializeDB');
-
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const certProps = {
 	days: 365, // Validity in days
@@ -113,16 +114,6 @@ authRouter.post('/auth', async (ctx, next) => {
 
 authRouter.use('/api/*', middlewareCheckAuthingToken);
 
-
-authRouter.post('/public/tts', async (ctx, next) => {
-	const body = ctx.request.body;
-	const filename = await ttsService.generateAudio(body.id, body.text);
-	const rstream = fs.createReadStream(filename);
-	ctx.response.set("content-type", "audio/mp3");
-	ctx.body = rstream;
-});
-
-
 authRouter.post('/public/tts2', async (ctx, next) => {
 	const body = ctx.request.body;
 	const fileId = await ttsService2.text2SpeechWave(body.id, body.text)
@@ -164,7 +155,7 @@ authRouter.get("/", async (ctx, next) => {
 	ctx.body = fs.createReadStream('./build/index.html');
 });
 
-app.use(static(
+app.use(serve(
 	path.join(__dirname, staticPath)
 ));
 

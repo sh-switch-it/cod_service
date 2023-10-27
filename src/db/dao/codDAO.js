@@ -1,6 +1,6 @@
-const CodRecord = require('../models/Schema').CodRecord;
-const { CallRecord } = require('../models/Schema');
-const BaseDAO = require('./BaseDAO');
+import { CodRecord } from '../models/Schema';
+import { CallRecord } from '../models/Schema';
+import BaseDAO from './BaseDAO';
 const includeCondition = [{
     model: CallRecord,
     as: "callRecords",
@@ -45,4 +45,4 @@ class CodDAO extends BaseDAO{
     
 }
 
-module.exports = new CodDAO();
+export default new CodDAO();

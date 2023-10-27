@@ -1,6 +1,6 @@
-var client = require('ari-client');
-const { phone_number } = require('faker/lib/locales/az');
-const config = require('../configReader')().config;
+import client from 'ari-client';
+import { getConfigReader } from '../configReader';
+const config = getConfigReader().getConfig();
 let ariClient;
 //const sipTrunkPool = {};
 client.connect(config.pbx.url, config.pbx.username, config.pbx.password).then(ari => {
@@ -136,7 +136,7 @@ function dialingNumber(pstnPoint,callTask,pendingTime,retryTimes){
 }
 
 
-module.exports = {
+export default {
     dialingNumber,
     dialingNumberTester
 };
