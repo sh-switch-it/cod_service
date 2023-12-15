@@ -14,7 +14,8 @@
     "start_local2": "APP_ENV=local2 node app.js",
     "start_docker": "APP_ENV=docker node app.js",
     "migrate": "migrate up --store=./src/state/custom-state-storage",
-    "doc": "apidoc -i src/api/ -o docs/apidoc/"
+    "doc": "apidoc -i src/api/ -o docs/apidoc/",
+    "test": "mocha -r @babel/register -r regenerator-runtime/runtime ./src/db/jsondao/test"
   },
   "dependencies": {
     "@koa/multer": "^3.0.2",
@@ -37,8 +38,8 @@
     "koa-static": "^5.0.0",
     "koa2-cors": "^2.0.6",
     "koa2-multiparty": "^1.0.1",
-    "lodash": "^4.17.20",
-    "lowdb": "^1.0.0",
+    "lodash": "^4.17.21",
+    "lowdb": "^6.1.1",
     "moment": "^2.29.1",
     "multer": "^1.4.5-lts.1",
     "multiparty": "^4.2.2",
@@ -62,9 +63,16 @@
     "write-excel-file": "^1.4.27"
   },
   "devDependencies": {
+    "@babel/core": "^7.23.3",
+    "@babel/preset-env": "^7.23.3",
+    "@babel/register": "^7.22.15",
     "apidoc": "^0.20.1",
+    "babel-preset-env": "^1.7.0",
+    "babel-register": "^6.26.0",
     "cross-env": "^7.0.3",
+    "esm": "^3.2.25",
     "migrate": "^1.7.0",
-    "mocha": "^7.1.0"
+    "mocha": "^7.2.0",
+    "regenerator-runtime": "^0.14.0"
   }
 }
