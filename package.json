@@ -13,7 +13,8 @@
     "start_local2": "APP_ENV=local2 node app.js",
     "start_docker": "APP_ENV=docker node app.js",
     "migrate": "migrate up --store=./src/state/custom-state-storage",
-    "doc": "apidoc -i src/api/ -o docs/apidoc/"
+    "doc": "apidoc -i src/api/ -o docs/apidoc/",
+    "dmdb_test": "node ./src/dmdb/test.js"
   },
   "dependencies": {
     "@koa/multer": "^3.0.2",
@@ -22,6 +23,7 @@
     "bluebird": "^3.7.2",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
+    "dmdb": "^1.0.19862",
     "faker": "^4.1.0",
     "form-data": "^3.0.0",
     "js-base64": "^2.5.1",

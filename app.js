@@ -32,7 +32,7 @@ const {StopExceptionCodTask} = require('./src/db/initializeDB');
 const {syncOrgList} = require('./src/db/initializeDB');
 const {syncJobList} = require('./src/db/initializeDB');
 
-
+const testDB = require('./src/dmdb/test');
 const certProps = {
 	days: 365, // Validity in days
 	selfSigned: true,
@@ -187,6 +187,7 @@ pem.createCertificate(certProps, (error, keys) => {
 			await StopExceptionCodTask();
 			await syncOrgList();
 			await syncJobList();
+			await testDB();
 		}
 		console.log('app https started at port 3010...');
 	});
